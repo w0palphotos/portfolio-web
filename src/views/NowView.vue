@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useStatusPage } from '@/composables/useStatusPage'
+import AnkiStats from '@/components/AnkiStats.vue'
 
 const { statusData } = useStatusPage()
 </script>
@@ -8,6 +9,8 @@ const { statusData } = useStatusPage()
   <main class="container page">
     <h1 class="page-title">Now</h1>
     <p class="page-subtitle">What I'm up to these days.</p>
+
+    <AnkiStats />
 
     <section class="section">
       <h2 class="section-title">Goals</h2>
