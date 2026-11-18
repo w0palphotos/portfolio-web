@@ -7,7 +7,6 @@
     "dev": "node scripts/fetch-medium.mjs && vite",
     "build": "node scripts/fetch-medium.mjs && vue-tsc -b && vite build",
     "preview": "vite preview",
-    "anki": "node scripts/fetch-anki.mjs",
     "postinstall": ""
   },
   "dependencies": {
