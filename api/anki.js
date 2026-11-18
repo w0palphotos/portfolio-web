@@ -65,6 +65,17 @@ function validDays(days) {
   )
 }
 
+function calculateStreak(days) {
+  if (!days || !days.length) return 0
+  const start = days[0][1] > 0 ? 0 : 1
+  let streak = 0
+  for (let i = start; i < days.length; i++) {
+    if (days[i][1] <= 0) break
+    streak++
+  }
+  return streak
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
@@ -111,7 +122,9 @@ export default async function handler(req, res) {
   const days = body.days && body.days.length ? body.days : (existing.days || [])
   const today = days[0]?.[1] ?? 0
   const totalReviews = days.reduce((sum, d) => sum + d[1], 0)
-  const currentStreak = Number.isInteger(body.currentStreak) ? body.currentStreak : (existing.currentStreak || 0)
+  const currentStreak = Number.isInteger(body.currentStreak) && body.currentStreak > 0
+    ? body.currentStreak
+    : (calculateStreak(days) || existing.currentStreak || 0)
 
   let presence = body.presence || existing.presence || null
   if (presence) {

@@ -27,7 +27,18 @@ interface Cell {
   future: boolean
 }
 
-const stats = ref<AnkiStats | null>(null)
+const displayStreak = computed(() => {
+  if (stats.value?.currentStreak && stats.value.currentStreak > 0) return stats.value.currentStreak
+  if (!stats.value?.days?.length) return 0
+  const days = stats.value.days
+  const start = days[0][1] > 0 ? 0 : 1
+  let streak = 0
+  for (let i = start; i < days.length; i++) {
+    if (days[i][1] <= 0) break
+    streak++
+  }
+  return streak
+})
 const loading = ref(true)
 let pollTimer: ReturnType<typeof setInterval> | null = null
 
@@ -152,7 +163,7 @@ onUnmounted(() => {
     <template v-if="stats && stats.days.length">
       <p class="summary">
         <template v-if="stats.totalCards">{{ stats.totalCards.toLocaleString() }} cards · </template>
-        {{ stats.currentStreak }} day streak
+        {{ displayStreak }} day streak
         · {{ stats.today }} today
       </p>
 
