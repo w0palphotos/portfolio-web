@@ -27,6 +27,7 @@ interface Cell {
   future: boolean
 }
 
+const stats = ref<AnkiStats | null>(null)
 const displayStreak = computed(() => {
   if (stats.value?.currentStreak && stats.value.currentStreak > 0) return stats.value.currentStreak
   if (!stats.value?.days?.length) return 0
