@@ -114,17 +114,34 @@ export default async function handler(req, res) {
   }
 
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
-  if (!body || body.v !== 1 || !validDays(body.days)) {
+  if (!body || body.v !== 1) {
+    return res.status(400).json({ error: 'bad payload' })
+  }
+  if (body.days !== undefined && !validDays(body.days)) {
     return res.status(400).json({ error: 'bad payload' })
   }
 
   const existing = (await kvGet()) || {}
-  const days = body.days && body.days.length ? body.days : (existing.days || [])
-  const today = days[0]?.[1] ?? 0
-  const totalReviews = days.reduce((sum, d) => sum + d[1], 0)
+
+  // If this is an offline signal or partial update, preserve existing historical review days in Redis
+  let days = existing.days || []
+  if (Array.isArray(body.days) && body.days.length > 0) {
+    if (body.days.length >= days.length || days.length === 0) {
+      days = body.days
+    }
+  }
+
+  const isOfflinePing = body.presence?.status === 'offline' && (!body.days || body.days.length === 0)
+  const today = isOfflinePing
+    ? (existing.today ?? (days[0]?.[1] ?? 0))
+    : (Number.isInteger(body.today) ? body.today : (days[0]?.[1] ?? 0))
+  const totalReviews = isOfflinePing
+    ? (existing.totalReviews ?? days.reduce((sum, d) => sum + d[1], 0))
+    : days.reduce((sum, d) => sum + d[1], 0)
+
   const currentStreak = Number.isInteger(body.currentStreak) && body.currentStreak > 0
     ? body.currentStreak
-    : (calculateStreak(days) || existing.currentStreak || 0)
+    : (existing.currentStreak || calculateStreak(days) || 0)
 
   let presence = body.presence || existing.presence || null
   if (presence) {
