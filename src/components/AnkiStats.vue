@@ -1,70 +1,201 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import AnkiDiscordCard from './AnkiDiscordCard.vue'
+
+interface Presence {
+  status: 'online' | 'offline'
+  state?: string
+  details?: string
+  startedAt?: number
+  icon?: string
+}
 
 interface AnkiStats {
   today: number
   totalReviews: number
+  totalCards?: number
   currentStreak: number
   days: [string, number][]
   updatedAt: string
-  demo?: boolean
+  topDeck?: { name: string } | string
+  presence?: Presence
+}
+
+interface Cell {
+  date: string
+  count: number
+  future: boolean
 }
 
 const stats = ref<AnkiStats | null>(null)
-const failed = ref(false)
+const loading = ref(true)
+let pollTimer: ReturnType<typeof setInterval> | null = null
 
-const days = computed(() => [...(stats.value?.days ?? [])].reverse())
-const max = computed(() => Math.max(1, ...days.value.map(([, n]) => n)))
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const dayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', '']
+
+function toISO(d: Date) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+const map = computed(() => new Map((stats.value?.days ?? []).map(([d, n]) => [d, n])))
+
+const todayDate = new Date()
+todayDate.setHours(0, 0, 0, 0)
+
+const weeks = computed<Cell[][]>(() => {
+  const end = new Date(todayDate)
+  end.setDate(end.getDate() + (6 - end.getDay()))
+  const start = new Date(end)
+  start.setDate(start.getDate() - 52 * 7 - 6)
+
+  const cols: Cell[][] = []
+  const cur = new Date(start)
+  let week: Cell[] = []
+  while (cur <= end) {
+    const iso = toISO(cur)
+    week.push({ date: iso, count: map.value.get(iso) ?? 0, future: cur.getTime() > todayDate.getTime() })
+    if (week.length === 7) {
+      cols.push(week)
+      week = []
+    }
+    cur.setDate(cur.getDate() + 1)
+  }
+  return cols
+})
+
+const maxCount = computed(() => {
+  let m = 0
+  for (const w of weeks.value) {
+    for (const c of w) {
+      if (!c.future && c.count > m) m = c.count
+    }
+  }
+  return m
+})
+
+function level(count: number, future: boolean) {
+  if (future || count <= 0) return 0
+  const m = maxCount.value || 1
+  const q = count / m
+  if (q <= 0.25) return 1
+  if (q <= 0.5) return 2
+  if (q <= 0.75) return 3
+  return 4
+}
+
+const monthLabels = computed(() => {
+  const labels: { index: number; name: string }[] = []
+  let last = -1
+  weeks.value.forEach((w, i) => {
+    const m = new Date(w[0].date + 'T00:00:00').getMonth()
+    if (m !== last) {
+      labels.push({ index: i, name: months[m] })
+      last = m
+    }
+  })
+  return labels.filter((l, i) => i === 0 || l.index - labels[i - 1].index >= 2)
+})
+
+const totalYear = computed(() => weeks.value.flat().reduce((s, c) => s + (c.future ? 0 : c.count), 0))
+
 const updated = computed(() => {
   if (!stats.value?.updatedAt) return ''
   const d = new Date(stats.value.updatedAt)
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString()
 })
 
-onMounted(async () => {
+function title(c: Cell) {
+  const n = c.count
+  return `${n} review${n === 1 ? '' : 's'} on ${c.date}`
+}
+
+async function loadStats() {
+  const api = import.meta.env.VITE_ANKI_API || '/api/anki'
+
   try {
-    const res = await fetch('/anki.json', { cache: 'no-store' })
+    const res = await fetch(api, { cache: 'no-store' })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = await res.json()
-    if (!Array.isArray(data.days)) throw new Error('Bad stats payload')
-    stats.value = data
+    if (Array.isArray(data.days)) {
+      stats.value = data
+      loading.value = false
+    }
   } catch {
-    failed.value = true
+    // If not yet pushed, remains loading or shows waiting state
   }
+}
+
+onMounted(() => {
+  loadStats()
+  pollTimer = setInterval(loadStats, 3_000)
+})
+
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
 })
 </script>
 
 <template>
   <section class="section anki">
+    <!-- Live Discord Presence Card when Anki is active on your device -->
+    <AnkiDiscordCard v-if="stats?.presence?.status === 'online'" :presence="stats.presence" />
+
     <div class="head">
       <h2 class="section-title">Anki</h2>
-      <span v-if="stats?.demo" class="badge">sample data</span>
     </div>
 
-    <p v-if="failed" class="empty">Stats unavailable. Run <code>npm run anki</code> to export.</p>
+    <!-- Live Stats from Anki -->
+    <template v-if="stats && stats.days.length">
+      <p class="summary">
+        <template v-if="stats.totalCards">{{ stats.totalCards.toLocaleString() }} cards · </template>
+        {{ stats.currentStreak }} day streak
+        · {{ stats.today }} today
+      </p>
 
-    <template v-else-if="stats">
-      <div class="metrics">
-        <div><strong>{{ stats.today }}</strong><span>today</span></div>
-        <div><strong>{{ stats.currentStreak }}</strong><span>day streak</span></div>
-        <div><strong>{{ stats.totalReviews }}</strong><span>reviews</span></div>
-      </div>
+      <div class="heat-wrap">
+        <div class="heat" :style="{ '--cols': weeks.length }">
+          <div class="months" aria-hidden="true">
+            <span
+              v-for="m in monthLabels"
+              :key="`${m.index}-${m.name}`"
+              class="month"
+              :style="{ gridColumn: m.index + 2 }"
+            >{{ m.name }}</span>
+          </div>
+          <div class="days" aria-hidden="true">
+            <span v-for="(d, i) in dayLabels" :key="i" :style="{ gridRow: i + 2 }">{{ d }}</span>
+          </div>
+          <div class="grid" role="img" aria-label="Anki review activity in the last year">
+            <template v-for="(week, wi) in weeks" :key="wi">
+              <div
+                v-for="(cell, di) in week"
+                :key="cell.date"
+                class="cell"
+                :class="`l${level(cell.count, cell.future)}`"
+                :style="{ gridColumn: wi + 2, gridRow: di + 2 }"
+                :title="title(cell)"
+              />
+            </template>
+          </div>
+        </div>
 
-      <div class="chart" role="img" aria-label="Reviews per day, last 30 days">
-        <div
-          v-for="[date, count] in days"
-          :key="date"
-          class="bar-wrap"
-          :title="`${date}: ${count} reviews`"
-        >
-          <div class="bar" :style="{ height: `${Math.max(2, (count / max) * 100)}%` }" />
+        <div class="legend" aria-hidden="true">
+          <span>Less</span>
+          <i class="cell l0" /><i class="cell l1" /><i class="cell l2" /><i class="cell l3" /><i class="cell l4" />
+          <span>More</span>
         </div>
       </div>
 
-      <p v-if="updated" class="updated">Updated {{ updated }}</p>
+      <p v-if="updated" class="updated">Synced from Anki {{ updated }}</p>
     </template>
 
-    <p v-else class="empty">Loading stats…</p>
+    <div v-else class="waiting-card">
+      <p class="empty">Waiting for Anki sync… Open Anki to broadcast streak and review stats directly.</p>
+    </div>
   </section>
 </template>
 
@@ -82,56 +213,76 @@ onMounted(async () => {
   color: var(--text-primary);
 }
 
-.badge {
+.summary {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
   margin-bottom: 0.75rem;
-  padding: 0.0625rem 0.375rem;
-  border: 1px solid var(--border-subtle);
-  border-radius: 0.25rem;
+}
+
+.heat-wrap {
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.heat {
+  --size: 10px;
+  --gap: 3px;
+  --h0: var(--bg-surface);
+  --h1: color-mix(in srgb, var(--accent) 22%, var(--bg-surface));
+  --h2: color-mix(in srgb, var(--accent) 45%, var(--bg-surface));
+  --h3: color-mix(in srgb, var(--accent) 72%, var(--bg-surface));
+  --h4: var(--accent);
+  display: inline-grid;
+  grid-template-columns: auto repeat(var(--cols), var(--size));
+  grid-template-rows: auto repeat(7, var(--size));
+  gap: var(--gap);
+  font-size: 10px;
   color: var(--text-muted);
-  font-size: 0.625rem;
 }
 
-.metrics {
+.months,
+.days,
+.grid {
+  display: contents;
+}
+
+.month {
+  grid-row: 1;
+  white-space: nowrap;
+  line-height: 1;
+  padding-bottom: 2px;
+}
+
+.days span {
+  grid-column: 1;
+  line-height: var(--size);
+  padding-right: 6px;
+}
+
+.cell {
+  width: var(--size);
+  height: var(--size);
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+
+.cell.l0 { background: var(--h0); box-shadow: inset 0 0 0 1px var(--border-subtle); }
+.cell.l1 { background: var(--h1); }
+.cell.l2 { background: var(--h2); }
+.cell.l3 { background: var(--h3); }
+.cell.l4 { background: var(--h4); }
+
+.legend {
   display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.metrics div {
-  display: flex;
-  flex-direction: column;
-}
-
-.metrics strong {
-  color: var(--text-accent);
-  font-size: 1.125rem;
-  line-height: 1.2;
-}
-
-.metrics span {
+  align-items: center;
+  gap: 4px;
+  margin-top: 0.5rem;
+  font-size: 10px;
   color: var(--text-muted);
-  font-size: 0.6875rem;
 }
 
-.chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.25rem;
-  height: 4rem;
-}
-
-.bar-wrap {
-  flex: 1;
-  height: 100%;
-  display: flex;
-  align-items: flex-end;
-}
-
-.bar {
-  width: 100%;
-  background: var(--accent);
-  border-radius: 0.125rem 0.125rem 0 0;
-  opacity: 0.8;
+.legend .cell {
+  display: inline-block;
 }
 
 .updated,
@@ -141,7 +292,10 @@ onMounted(async () => {
   font-size: 0.6875rem;
 }
 
-.empty code {
-  color: var(--text-accent);
+.waiting-card {
+  padding: 1rem;
+  border: 1px dashed var(--border-subtle);
+  border-radius: 6px;
+  margin-bottom: 1rem;
 }
 </style>
