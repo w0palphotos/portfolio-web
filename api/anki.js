@@ -8,8 +8,15 @@ const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
 // Fallback in-memory store when database is not configured
 let inMemoryStats = null
 
+// Short memo cache + circuit breaker: viral viewer spikes and Redis quota
+// exhaustion must not multiply into one Redis command per request.
+let memo = { data: null, at: 0 }
+const breaker = { failures: 0, openUntil: 0 }
+
 async function kvGet() {
-  if (redisUrl && redisToken) {
+  const now = Date.now()
+  if (memo.data && now - memo.at < 2000) return memo.data
+  if (redisUrl && redisToken && now >= breaker.openUntil) {
     try {
       const res = await fetch(redisUrl, {
         method: 'POST',
@@ -19,11 +26,18 @@ async function kvGet() {
         },
         body: JSON.stringify(['GET', KEY]),
       })
-      if (res.ok) {
-        const json = await res.json()
-        if (json.result) return JSON.parse(json.result)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const json = await res.json()
+      if (json.error) throw new Error(json.error)
+      breaker.failures = 0
+      if (json.result) {
+        const data = JSON.parse(json.result)
+        memo = { data, at: now }
+        return data
       }
     } catch (err) {
+      breaker.failures++
+      if (breaker.failures >= 3) breaker.openUntil = Date.now() + 15_000
       console.warn('[anki-api] Redis read failed, falling back to memory:', err.message)
     }
   }
@@ -32,6 +46,7 @@ async function kvGet() {
 
 async function kvSet(data) {
   inMemoryStats = data
+  memo = { data, at: Date.now() }
   if (redisUrl && redisToken) {
     try {
       await fetch(redisUrl, {
@@ -98,7 +113,9 @@ export default async function handler(req, res) {
       }
     }
 
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    // Global (non-personalized) response: edge-cacheable so viral traffic
+    // spikes don't multiply Redis/function load per viewer.
+    res.setHeader('Cache-Control', 'public, s-maxage=5, stale-while-revalidate=30')
     return res.status(200).json(data)
   }
 
