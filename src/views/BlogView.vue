@@ -2,33 +2,35 @@
 import { Search } from 'lucide-vue-next'
 import BlogCard from '@/components/BlogCard.vue'
 import { useBlogPosts } from '@/composables/useBlogPosts'
+import { useI18n } from '@/i18n'
 
 const { searchQuery, loading, filteredPosts } = useBlogPosts()
+const { t } = useI18n()
 </script>
 
 <template>
   <main class="container page">
-    <h1 class="page-title">Blog</h1>
-    <p class="page-subtitle">Writing about software, linux, and photography.</p>
+    <h1 class="page-title">{{ t('blog.title') }}</h1>
+    <p class="page-subtitle">{{ t('blog.subtitle') }}</p>
 
     <div class="search-wrapper">
       <Search :size="14" class="search-icon" />
       <input
         v-model="searchQuery"
         type="text"
-        placeholder="Search posts..."
+        :placeholder="t('blog.search')"
         class="search-input"
       />
     </div>
 
-    <div v-if="loading" class="empty-state">Loading...</div>
+    <div v-if="loading" class="empty-state">{{ t('blog.loading') }}</div>
 
     <div v-else-if="filteredPosts.length > 0" class="blog-list">
       <BlogCard v-for="post in filteredPosts" :key="post.id" :post="post" />
     </div>
 
     <div v-else class="empty-state">
-      {{ searchQuery ? 'No matching posts found.' : 'No posts yet.' }}
+      {{ searchQuery ? t('blog.noMatch') : t('blog.noPosts') }}
     </div>
   </main>
 </template>

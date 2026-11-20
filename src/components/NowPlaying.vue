@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { Music } from 'lucide-vue-next'
+import { useI18n } from '@/i18n'
 
 const props = defineProps<{
   username: string
   apiKey: string
 }>()
+
+const { t } = useI18n()
 
 interface Track {
   name: string
@@ -67,7 +70,7 @@ onUnmounted(() => {
       </div>
       <div class="now-playing-info">
         <template v-if="track">
-          <span class="now-playing-label">Now playing</span>
+          <span class="now-playing-label">{{ t('nowPlaying.playing') }}</span>
           <a
             :href="track.url"
             target="_blank"
@@ -77,8 +80,8 @@ onUnmounted(() => {
           <span class="now-playing-artist">{{ track.artist }}</span>
         </template>
         <template v-else>
-          <span class="now-playing-label">Nothing playing</span>
-          <span class="now-playing-idle">Check back later</span>
+          <span class="now-playing-label">{{ t('nowPlaying.nothing') }}</span>
+          <span class="now-playing-idle">{{ t('nowPlaying.checkBack') }}</span>
         </template>
       </div>
     </div>

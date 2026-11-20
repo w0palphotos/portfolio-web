@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useThemeStore } from '@/stores/theme'
 import AppHeader from '@/components/AppHeader.vue'
+import { useI18n } from '@/i18n'
 
-const theme = useThemeStore()
 const route = useRoute()
+const { locale, t } = useI18n()
 
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 const nowPlayingVisible = ref(true)
@@ -16,10 +16,6 @@ function toggleNowPlaying() {
 
 const lastfmUsername = import.meta.env.VITE_LASTFM_USERNAME || ''
 const lastfmApiKey = import.meta.env.VITE_LASTFM_API_KEY || ''
-
-onMounted(() => {
-  theme.init()
-})
 </script>
 
 <template>
@@ -37,6 +33,9 @@ onMounted(() => {
           <component :is="Component" />
         </transition>
       </router-view>
+      <footer v-if="locale === 'ja' && !isAdminRoute" class="translation-note">
+        {{ t('lang.note') }}
+      </footer>
     </div>
   </div>
 </template>
@@ -59,5 +58,12 @@ onMounted(() => {
   .content-area {
     padding-top: 0;
   }
+}
+
+.translation-note {
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
 }
 </style>

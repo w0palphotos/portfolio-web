@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { navLinks } from '@/config/navigation'
-import { Menu, X, Disc3, Sun, Moon } from 'lucide-vue-next'
-import { useThemeStore } from '@/stores/theme'
+import { navLinks, type NavLink } from '@/config/navigation'
+import { Menu, X, Disc3, Languages } from 'lucide-vue-next'
 import NowPlaying from '@/components/NowPlaying.vue'
+import { useI18n } from '@/i18n'
 
 defineProps<{
   nowPlayingVisible: boolean
@@ -16,12 +16,16 @@ const emit = defineEmits<{
   'toggle-now-playing': []
 }>()
 
-const themeStore = useThemeStore()
 const route = useRoute()
+const { t, toggle } = useI18n()
 const mobileOpen = ref(false)
 
 function closeMobile() {
   mobileOpen.value = false
+}
+
+function isActive(link: NavLink) {
+  return route.path === link.href || (link.href !== '/' && route.path.startsWith(link.href + '/'))
 }
 </script>
 
@@ -32,6 +36,7 @@ function closeMobile() {
     <button
       class="hamburger"
       @click="mobileOpen = !mobileOpen"
+      :aria-expanded="mobileOpen"
       aria-label="Toggle navigation"
     >
       <Menu v-if="!mobileOpen" :size="18" />
@@ -48,35 +53,32 @@ function closeMobile() {
     />
   </transition>
 
-  <!-- Sidebar (desktop + mobile slide-in) -->
-  <aside
-    class="sidebar"
-    :class="{ open: mobileOpen }"
-  >
+  <!-- Sidebar (desktop fixed + mobile slide-in drawer) -->
+  <aside class="sidebar" :class="{ open: mobileOpen }">
     <div class="sidebar-scroll">
-      <router-link to="/" class="sidebar-brand">w0pal</router-link>
-      <nav class="sidebar-nav">
+      <router-link to="/" class="sidebar-brand" @click="closeMobile">w0pal</router-link>
+      <nav class="sidebar-nav" aria-label="Primary">
         <router-link
           v-for="link in navLinks"
           :key="link.href"
           :to="link.href"
           class="nav-item"
-          :class="{ active: route.path === link.href }"
+          :class="{ active: isActive(link) }"
+          :aria-current="isActive(link) ? 'page' : undefined"
           @click="closeMobile"
         >
-          {{ link.label }}
+          {{ t(link.label) }}
         </router-link>
       </nav>
     </div>
     <div class="sidebar-footer">
       <button
-        class="theme-toggle"
-        @click="themeStore.toggle"
-        aria-label="Toggle theme"
+        class="lang-toggle"
+        @click="toggle"
+        :aria-label="t('lang.switch')"
       >
-        <Sun v-if="!themeStore.isDarkMode" :size="14" />
-        <Moon v-else :size="14" />
-        <span>{{ themeStore.isDarkMode ? 'Dark' : 'Light' }}</span>
+        <Languages :size="14" />
+        <span>{{ t('lang.target') }}</span>
       </button>
       <button
         class="now-playing-toggle"
@@ -85,7 +87,7 @@ function closeMobile() {
         aria-label="Toggle now playing"
       >
         <Disc3 :size="14" />
-        <span>Now Playing</span>
+        <span>{{ t('nowPlaying.toggle') }}</span>
       </button>
       <NowPlaying
         v-if="nowPlayingVisible"
@@ -101,7 +103,9 @@ function closeMobile() {
 .mobile-header {
   position: sticky;
   top: 0;
-  z-index: 50;
+  /* Above the drawer (z-50) so the hamburger/X stays visible and clickable
+     while the menu is open */
+  z-index: 60;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -125,6 +129,8 @@ function closeMobile() {
   color: var(--text-primary);
   cursor: pointer;
   padding: 0.375rem;
+  display: flex;
+  align-items: center;
 }
 
 /* ===== Mobile overlay ===== */
@@ -145,7 +151,7 @@ function closeMobile() {
   opacity: 0;
 }
 
-/* ===== Sidebar ===== */
+/* ===== Sidebar: hidden by default, slide-in drawer on mobile ===== */
 .sidebar {
   position: fixed;
   top: 0;
@@ -162,6 +168,26 @@ function closeMobile() {
   transition: transform 0.25s ease-out;
 }
 
+.sidebar.open {
+  transform: translateX(0);
+}
+
+/* Mobile: full-width drawer, content starts below the persistent header */
+@media (max-width: 767px) {
+  .sidebar.open {
+    width: 100%;
+  }
+
+  .sidebar {
+    padding-top: 3.25rem;
+  }
+
+  /* Header already shows the brand while the drawer is open */
+  .sidebar .sidebar-brand {
+    display: none;
+  }
+}
+
 /* Desktop: always visible, hide mobile elements */
 @media (min-width: 768px) {
   .sidebar {
@@ -172,21 +198,6 @@ function closeMobile() {
   .mobile-overlay {
     display: none;
   }
-}
-/* Mobile: full-width sidebar when open */
-@media (max-width: 767px) {
-  .sidebar.open {
-    width: 100%;
-  }
-}
-
-/* Mobile: slide in when open */
-.sidebar.open {
-  transform: translateX(0);
-}
-
-.sidebar-inner {
-  display: none;
 }
 
 .sidebar-scroll {
@@ -224,21 +235,6 @@ function closeMobile() {
   color: var(--accent);
 }
 
-/* Mobile: compact layout */
-@media (max-width: 767px) {
-  .sidebar-scroll {
-    padding: 1.25rem 1.25rem 0;
-  }
-
-  .sidebar-brand {
-    margin-bottom: 1rem;
-  }
-
-  .nav-item {
-    padding: 0.375rem 0;
-  }
-}
-
 /* ===== Sidebar footer ===== */
 .sidebar-footer {
   padding: 1rem 1.5rem 1.5rem;
@@ -246,7 +242,6 @@ function closeMobile() {
   flex-shrink: 0;
 }
 
-.theme-toggle,
 .now-playing-toggle {
   display: flex;
   align-items: center;
@@ -262,24 +257,30 @@ function closeMobile() {
   transition: color 0.15s;
 }
 
-.theme-toggle:hover,
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.lang-toggle:hover {
+  color: var(--text-primary);
+}
+
 .now-playing-toggle:hover {
   color: var(--text-primary);
 }
 
 .now-playing-toggle.active {
   color: var(--accent);
-}
-
-/* Mobile: compact footer */
-@media (max-width: 767px) {
-  .sidebar-footer {
-    padding: 0.75rem 1.25rem 1.25rem;
-  }
-
-  .theme-toggle,
-  .now-playing-toggle {
-    padding: 0.375rem 0;
-  }
 }
 </style>

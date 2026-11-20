@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from '@/i18n'
 
 interface BlogPost {
   id: string
@@ -18,8 +19,9 @@ const props = defineProps<{
 
 const isMedium = computed(() => props.post.source === 'MEDIUM')
 
+const { locale } = useI18n()
 const date = computed(() =>
-  new Date(props.post.createdAt).toLocaleDateString('id-ID', {
+  new Date(props.post.createdAt).toLocaleDateString(locale.value === 'ja' ? 'ja-JP' : 'id-ID', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
