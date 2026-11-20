@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from '@/i18n'
 
 const { t } = useI18n()
@@ -66,6 +66,43 @@ const now = ref(Date.now())
 let pollTimer: ReturnType<typeof setInterval> | null = null
 let tickTimer: ReturnType<typeof setInterval> | null = null
 
+// Scale the fastfetch output to fill the box width (no horizontal scroll):
+// grows to fill on desktop, shrinks on narrow screens. Measured against the
+// real content width (not scrollWidth, which floors at the box width and so
+// can never grow the font back). Monospace text scales linearly.
+const MIN_FONT = 7
+const MAX_FONT = 15
+const fetchBox = ref<HTMLElement | null>(null)
+const fetchContent = ref<HTMLElement | null>(null)
+const fontSize = ref(12)
+let boxRo: ResizeObserver | null = null
+
+function fitBox() {
+  const box = fetchBox.value
+  const content = fetchContent.value
+  if (!box || !content) return
+  const cs = getComputedStyle(box)
+  const available = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+  const natural = content.getBoundingClientRect().width
+  if (!available || !natural) return
+  // 0.98 leaves a hair of margin; round down so the last column never clips
+  const target = Math.min(MAX_FONT, Math.max(MIN_FONT, fontSize.value * (available / natural) * 0.98))
+  fontSize.value = Math.floor(target * 2) / 2
+}
+
+// Re-fit until the font stops changing (converges in 1-2 passes). Bounded so
+// it can never loop forever.
+function settle() {
+  let passes = 0
+  const step = () => {
+    const before = fontSize.value
+    fitBox()
+    passes++
+    if (fontSize.value !== before && passes < 6) nextTick(step)
+  }
+  nextTick(step)
+}
+
 async function load() {
   const api = import.meta.env.VITE_HOMELAB_API || '/api/homelab'
   try {
@@ -90,7 +127,40 @@ onMounted(() => {
 onUnmounted(() => {
   if (pollTimer) clearInterval(pollTimer)
   if (tickTimer) clearInterval(tickTimer)
+  boxRo?.disconnect()
+  logoMq?.removeEventListener('change', onLogoBreakpoint)
 })
+
+// The box renders once stats load; attach the observer when it appears.
+// React only to WIDTH changes so our own font tweaks (which change height)
+// don't feed back into a resize loop.
+let lastBoxWidth = 0
+let logoMq: MediaQueryList | null = null
+const onLogoBreakpoint = () => settle()
+watch(fetchBox, (el, oldEl) => {
+  if (oldEl) boxRo?.unobserve(oldEl)
+  if (el) {
+    if (!boxRo) {
+      boxRo = new ResizeObserver(() => {
+        const w = fetchBox.value?.clientWidth ?? 0
+        if (w !== lastBoxWidth) {
+          lastBoxWidth = w
+          settle()
+        }
+      })
+    }
+    lastBoxWidth = el.clientWidth
+    boxRo.observe(el)
+    if (!logoMq) {
+      logoMq = window.matchMedia('(max-width: 640px)')
+      logoMq.addEventListener('change', onLogoBreakpoint)
+    }
+    settle()
+  }
+})
+
+// Re-fit when fresh output arrives (values can change the line widths).
+watch(() => stats.value?.updatedAt, () => settle())
 
 const user = computed(() => stats.value?.user || 'tomori')
 const hostname = computed(() => stats.value?.hostname || 'homelab')
@@ -179,9 +249,9 @@ const lastSeenText = computed(() => agoText(stats.value?.lastSeen || stats.value
   <section class="section homelab">
     <h2 class="section-title">{{ t('now.homelab') }}</h2>
 
-    <div class="fetchbox" :aria-label="state === 'online' ? 'Live fastfetch output from the homelab' : 'Homelab status (offline)'">
+    <div ref="fetchBox" class="fetchbox" :style="{ fontSize: fontSize + 'px' }" :aria-label="state === 'online' ? 'Live fastfetch output from the homelab' : 'Homelab status (offline)'">
       <template v-if="state === 'online' && stats">
-        <div class="fetch">
+        <div ref="fetchContent" class="fetch">
           <pre class="logo" aria-hidden="true">{{ LOGO }}</pre>
           <div class="info">
             <p class="title-line">{{ titleLine }}</p>
@@ -226,11 +296,12 @@ const lastSeenText = computed(() => agoText(stats.value?.lastSeen || stats.value
   color: #cdd6f4;
   font-size: 0.75rem;
   line-height: 1.55;
-  overflow-x: auto;
+  overflow: hidden;
 }
 
 .fetch {
-  display: flex;
+  display: inline-flex;
+  vertical-align: top;
   gap: 3ch;
   align-items: flex-start;
 }
@@ -297,10 +368,6 @@ const lastSeenText = computed(() => agoText(stats.value?.lastSeen || stats.value
 }
 
 @media (max-width: 640px) {
-  .fetchbox {
-    font-size: 0.7rem;
-  }
-
   .logo {
     display: none;
   }
