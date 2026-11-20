@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useInteractiveTerminal } from '@/composables/useInteractiveTerminal'
+import { useHomelabShell } from '@/composables/useHomelabShell'
+import { useI18n } from '@/i18n'
 
-const { lines, currentInput, outputRef, handleKeydown, focus, prompt, ansiToHtml } = useInteractiveTerminal()
+const { lines, currentInput, busy, outputRef, handleKeydown, focus, prompt, ansiToHtml } = useHomelabShell()
+const { t } = useI18n()
 
 onMounted(() => {
   focus()
@@ -24,11 +26,13 @@ onMounted(() => {
       <div class="prompt-block">
         <div class="prompt-info">{{ prompt }}</div>
         <div class="prompt-input-line">
-          <span class="prompt-char">%</span>
+          <span class="prompt-char">$</span>
           <input
             v-model="currentInput"
             type="text"
             class="terminal-input"
+            :placeholder="busy ? t('terminal.placeholderBusy') : t('terminal.placeholder')"
+            :disabled="busy"
             autocomplete="off"
             autocapitalize="off"
             spellcheck="false"
@@ -44,8 +48,8 @@ onMounted(() => {
 .terminal-page {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 3.25rem);
-  min-height: calc(100dvh - 3.25rem);
+  height: calc(100vh - 3.25rem);
+  height: calc(100dvh - 3.25rem);
   background: var(--bg-primary);
   font-family: var(--font-mono);
   font-size: 0.8125rem;
@@ -57,13 +61,14 @@ onMounted(() => {
 
 @media (min-width: 768px) {
   .terminal-page {
-    min-height: 100vh;
-    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
   }
 }
 
 .terminal-output {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 1.25rem 1.5rem 0.5rem;
   scroll-behavior: smooth;
@@ -138,24 +143,7 @@ onMounted(() => {
   color: var(--text-muted);
 }
 
-.ansi-bold { font-weight: 700; }
-.ansi-uline { text-decoration: underline; }
-
-.ansi-30 { color: var(--text-muted); }
-.ansi-31 { color: var(--accent-red); }
-.ansi-32 { color: var(--accent-green); }
-.ansi-33 { color: var(--accent-yellow); }
-.ansi-34 { color: var(--accent); }
-.ansi-35 { color: var(--accent); }
-.ansi-36 { color: var(--accent); }
-.ansi-37 { color: var(--text-primary); }
-
-.ansi-90 { color: var(--text-muted); }
-.ansi-91 { color: var(--accent-red); }
-.ansi-92 { color: var(--accent-green); }
-.ansi-93 { color: var(--accent-yellow); }
-.ansi-94 { color: var(--accent); }
-.ansi-95 { color: var(--accent); }
-.ansi-96 { color: var(--accent); }
-.ansi-97 { color: var(--text-primary); }
+.terminal-input:disabled {
+  opacity: 0.6;
+}
 </style>
