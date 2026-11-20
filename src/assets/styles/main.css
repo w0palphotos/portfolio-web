@@ -24,29 +24,6 @@
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Menlo', monospace;
 }
 
-[data-theme='light'] {
-  --bg-primary: #ffffff;
-  --bg-surface: #f6f8fa;
-  --bg-card: #ffffff;
-  --bg-header: rgba(255, 255, 255, 0.85);
-  --bg-input: #f6f8fa;
-  --border-subtle: #d0d7de;
-  --border-primary: #d0d7de;
-  --border-input: #d0d7de;
-  --text-primary: #1f2328;
-  --text-secondary: #656d76;
-  --text-muted: #6e7681;
-  --text-accent: #0969da;
-  --accent: #0969da;
-  --accent-hover: #0550ae;
-  --accent-green: #1a7f37;
-  --accent-red: #cf222e;
-  --accent-yellow: #9a6700;
-  --badge-bg: #f6f8fa;
-  --accent-bg: #ddf4ff;
-  --accent-text: #0969da;
-}
-
 * {
   margin: 0;
   padding: 0;

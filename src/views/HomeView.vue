@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from '@/i18n'
+
+const { t } = useI18n()
+
 const socialLinks = [
   { href: 'https://github.com/w0pal', label: 'GitHub' },
   { href: 'https://instagram.com/w0pal', label: 'Instagram' },
@@ -9,20 +13,12 @@ const socialLinks = [
 
 <template>
   <main class="container page">
-    <h1 class="greeting">hey, i'm w0pal.</h1>
-    <p class="tagline">informatics, linux, and street photography.</p>
+    <h1 class="greeting">{{ t('home.greeting') }}</h1>
+    <p class="tagline">{{ t('home.tagline') }}</p>
 
-    <p class="bio">
-      I like building things, breaking stuff (sometimes), and figuring out how things work.
-      Most of what I build comes from curiosity — trying to solve my own problems
-      or exploring ideas that seem interesting at the time.
-      Some of it turns into websites, software, scripts, and Linux customization.
-    </p>
+    <p class="bio">{{ t('home.bio1') }}</p>
 
-    <p class="bio">
-      Outside of that, I take street photos, binge anime, and occasionally
-      spend time on PC building.
-    </p>
+    <p class="bio">{{ t('home.bio2') }}</p>
 
     <div class="links">
       <a

@@ -16,7 +16,6 @@ const formData = ref({
 const defaultData = {
   goals: [
     'Lulus kuliah menggunakan Linux (jurnal, skripsi, etc)',
-    'Konsisten daily photo di Instagram',
   ],
   interests: [
     'Street photography',
