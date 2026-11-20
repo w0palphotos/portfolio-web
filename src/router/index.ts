@@ -3,6 +3,7 @@ import HomeView from '@/views/HomeView.vue'
 import ProjectsView from '@/views/ProjectsView.vue'
 import BlogView from '@/views/BlogView.vue'
 import BlogDetailView from '@/views/BlogDetailView.vue'
+import AboutView from '@/views/AboutView.vue'
 import NowView from '@/views/NowView.vue'
 import TerminalView from '@/views/TerminalView.vue'
 
@@ -28,6 +29,11 @@ const router = createRouter({
       path: '/blog/:slug',
       name: 'blog-detail',
       component: BlogDetailView,
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: AboutView,
     },
     {
       path: '/now',
