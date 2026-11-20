@@ -11,17 +11,33 @@ const API = '/api/terminal'
 const POLL_MS = 1000
 const TIMEOUT_MS = 25_000
 
-// `desc` holds an i18n key; command names stay literal.
+// `desc` holds an i18n key; command names stay literal. Flags are validated
+// per-command by the API, so the list here is just bare command names.
 export const SHELL_COMMANDS = [
   { name: 'fastfetch', desc: 'terminal.cmd.fastfetch' },
-  { name: 'btop', desc: 'terminal.cmd.btop' },
-  { name: 'df -h', desc: 'terminal.cmd.df' },
-  { name: 'free -h', desc: 'terminal.cmd.free' },
+  { name: 'top', desc: 'terminal.cmd.top' },
+  { name: 'df', desc: 'terminal.cmd.df' },
+  { name: 'free', desc: 'terminal.cmd.free' },
   { name: 'uptime', desc: 'terminal.cmd.uptime' },
-  { name: 'uname -a', desc: 'terminal.cmd.uname' },
-  { name: 'lsblk', desc: 'terminal.cmd.lsblk' },
+  { name: 'uname', desc: 'terminal.cmd.uname' },
   { name: 'hostname', desc: 'terminal.cmd.hostname' },
   { name: 'date', desc: 'terminal.cmd.date' },
+  { name: 'lsblk', desc: 'terminal.cmd.lsblk' },
+  { name: 'lscpu', desc: 'terminal.cmd.lscpu' },
+  { name: 'vmstat', desc: 'terminal.cmd.vmstat' },
+  { name: 'whoami', desc: 'terminal.cmd.whoami' },
+  { name: 'id', desc: 'terminal.cmd.id' },
+  { name: 'groups', desc: 'terminal.cmd.groups' },
+  { name: 'who', desc: 'terminal.cmd.who' },
+  { name: 'w', desc: 'terminal.cmd.w' },
+  { name: 'users', desc: 'terminal.cmd.users' },
+  { name: 'logname', desc: 'terminal.cmd.logname' },
+  { name: 'tty', desc: 'terminal.cmd.tty' },
+  { name: 'pwd', desc: 'terminal.cmd.pwd' },
+  { name: 'arch', desc: 'terminal.cmd.arch' },
+  { name: 'nproc', desc: 'terminal.cmd.nproc' },
+  { name: 'cal', desc: 'terminal.cmd.cal' },
+  { name: 'echo', desc: 'terminal.cmd.echo' },
   { name: 'help', desc: 'terminal.cmd.help' },
   { name: 'clear', desc: 'terminal.cmd.clear' },
 ]
@@ -158,27 +174,32 @@ export function useHomelabShell() {
     historyIndex.value = commandHistory.value.length
     currentInput.value = ''
 
-    const normalized = raw.toLowerCase().replace(/\s+/g, ' ')
+    // Lowercase only the command name; keep flag/format case (df -T, date +%Y).
+    const trimmed = raw.replace(/\s+/g, ' ')
+    const sp = trimmed.indexOf(' ')
+    const cmdName = (sp < 0 ? trimmed : trimmed.slice(0, sp)).toLowerCase()
+    const argsStr = sp < 0 ? '' : trimmed.slice(sp + 1)
+    const normalized = cmdName + (argsStr ? ' ' + argsStr : '')
     lines.value.push(inputLine(raw))
 
-    if (normalized === 'clear') {
+    if (cmdName === 'clear') {
       lines.value = []
       scrollToBottom()
       return
     }
-    if (normalized === 'help') {
+    if (cmdName === 'help') {
       pushOutput({ text: buildHelp(), type: 'output' })
       return
     }
-    if (normalized === 'history') {
+    if (cmdName === 'history') {
       const hist = commandHistory.value.map((c, i) => `  ${String(i + 1).padStart(4)}  ${c}`)
       pushOutput({ text: hist.join('\n') || `  ${t('terminal.noHistory')}`, type: 'output' })
       return
     }
 
-    const known = SHELL_COMMANDS.some((c) => c.name === normalized)
+    const known = SHELL_COMMANDS.some((c) => c.name === cmdName)
     if (!known) {
-      pushOutput({ text: t('terminal.notAllowed', { cmd: raw.split(/\s+/)[0] }), type: 'error' })
+      pushOutput({ text: t('terminal.notAllowed', { cmd: cmdName }), type: 'error' })
       return
     }
 
