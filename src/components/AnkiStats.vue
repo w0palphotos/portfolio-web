@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { useAnkiStats } from '@/composables/useAnkiStats'
 import { useI18n } from '@/i18n'
 
@@ -25,14 +25,22 @@ const displayStreak = computed(() => {
   return streak
 })
 
-// On mobile/tablet the graph starts at the first reviewed day (the dotted
-// range), not a full year of mostly-empty cells. The grid still fluid-fits
-// the container width so it never scrolls.
-const isMobile = ref(false)
-let mq: MediaQueryList | null = null
-function onMqChange(e: MediaQueryListEvent) {
-  isMobile.value = e.matches
-}
+// The number of weeks shown scales with the container width, capped at a
+// full year. Desktop fits the whole year at a readable ~10px dot; smaller
+// screens show fewer weeks (smaller range) so dots never get microscopic.
+// The grid fluid-fills the width, so it never scrolls.
+const heatWrap = ref<HTMLElement | null>(null)
+const containerWidth = ref(0)
+let ro: ResizeObserver | null = null
+
+const TARGET_PITCH = 13 // ~10px cell + ~3px gap; 53 weeks fit on desktop
+const numWeeks = computed(() => {
+  const w = containerWidth.value
+  if (!w) return 53 // before the first measurement, assume desktop
+  const gutter = w <= 480 ? 0 : 30 // day-label column (hidden on small screens)
+  const n = Math.floor((w - gutter) / TARGET_PITCH)
+  return Math.max(6, Math.min(53, n))
+})
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const dayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', '']
@@ -46,15 +54,6 @@ function toISO(d: Date) {
 
 const map = computed(() => new Map((stats.value?.days ?? []).map(([d, n]) => [d, n])))
 
-// Oldest day with reviews (days are newest-first); fallback to oldest entry
-const firstActiveDate = computed(() => {
-  const days = stats.value?.days ?? []
-  for (let i = days.length - 1; i >= 0; i--) {
-    if (days[i][1] > 0) return days[i][0]
-  }
-  return days.length ? days[days.length - 1][0] : null
-})
-
 const todayDate = new Date()
 todayDate.setHours(0, 0, 0, 0)
 
@@ -62,14 +61,7 @@ const weeks = computed<Cell[][]>(() => {
   const end = new Date(todayDate)
   end.setDate(end.getDate() + (6 - end.getDay()))
   const start = new Date(end)
-  if (isMobile.value && firstActiveDate.value) {
-    // Mobile/tablet: start at the week of the first reviewed day
-    start.setTime(new Date(firstActiveDate.value + 'T00:00:00').getTime())
-    start.setDate(start.getDate() - start.getDay())
-    if (start.getTime() > end.getTime()) start.setTime(end.getTime())
-  } else {
-    start.setDate(start.getDate() - 52 * 7 - 6)
-  }
+  start.setDate(start.getDate() - ((numWeeks.value - 1) * 7 + 6))
 
   const cols: Cell[][] = []
   const cur = new Date(start)
@@ -142,14 +134,23 @@ function title(c: Cell) {
   return `${n} review${n === 1 ? '' : 's'} on ${c.date}`
 }
 
-onMounted(() => {
-  mq = window.matchMedia('(max-width: 767px)')
-  isMobile.value = mq.matches
-  mq.addEventListener('change', onMqChange)
+// The heatmap renders only once stats load, so attach the observer when the
+// element actually appears (a plain onMounted would see a null ref).
+watch(heatWrap, (el, oldEl) => {
+  if (oldEl) ro?.unobserve(oldEl)
+  if (el) {
+    containerWidth.value = el.clientWidth
+    if (!ro) {
+      ro = new ResizeObserver((entries) => {
+        for (const entry of entries) containerWidth.value = entry.contentRect.width
+      })
+    }
+    ro.observe(el)
+  }
 })
 
 onUnmounted(() => {
-  mq?.removeEventListener('change', onMqChange)
+  ro?.disconnect()
 })
 </script>
 
@@ -163,7 +164,7 @@ onUnmounted(() => {
     <template v-if="stats && stats.days.length">
       <p class="summary">{{ summaryText }}</p>
 
-      <div class="heat-wrap">
+      <div ref="heatWrap" class="heat-wrap">
         <div class="heat" :style="{ '--cols': weeks.length }">
           <div class="months" aria-hidden="true">
             <span
@@ -176,7 +177,7 @@ onUnmounted(() => {
           <div class="days" aria-hidden="true">
             <span v-for="(d, i) in dayLabels" :key="i" :style="{ gridRow: i + 2 }">{{ d }}</span>
           </div>
-          <div class="grid" role="img" aria-label="Anki review activity in the last year">
+          <div class="grid" role="img" aria-label="Anki review activity heatmap">
             <template v-for="(week, wi) in weeks" :key="wi">
               <div
                 v-for="(cell, di) in week"
