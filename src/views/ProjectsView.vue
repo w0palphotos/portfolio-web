@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { ExternalLink } from 'lucide-vue-next'
 import { usePortfolio } from '@/composables/usePortfolio'
+import { useI18n } from '@/i18n'
 
 const { items } = usePortfolio()
+const { t } = useI18n()
 </script>
 
 <template>
   <main class="container page">
-    <h1 class="page-title">Projects</h1>
-    <p class="page-subtitle">Things I've built and worked on.</p>
+    <h1 class="page-title">{{ t('projects.title') }}</h1>
+    <p class="page-subtitle">{{ t('projects.subtitle') }}</p>
 
     <div v-if="items.length === 0" class="empty-state">
-      Nothing here yet. Check back later.
+      {{ t('projects.empty') }}
     </div>
 
     <div v-else class="project-list">
@@ -37,6 +39,7 @@ const { items } = usePortfolio()
         <div class="project-body">
           <div class="project-header">
             <h3 class="project-title">{{ project.title }}</h3>
+            <span v-if="project.stars" class="project-stars" :title="`${project.stars} GitHub stars`">★ {{ project.stars }}</span>
             <a
               v-if="project.link"
               :href="project.link"
@@ -48,7 +51,7 @@ const { items } = usePortfolio()
               <ExternalLink :size="14" />
             </a>
           </div>
-          <p class="project-desc">{{ project.description }}</p>
+          <p class="project-desc">{{ t(project.description) }}</p>
           <div class="project-tags">
             <span v-for="tag in project.tags" :key="tag" class="tag">{{ tag }}</span>
           </div>
@@ -138,6 +141,12 @@ const { items } = usePortfolio()
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+.project-stars {
+  font-size: 0.6875rem;
+  color: var(--accent-yellow);
+  white-space: nowrap;
 }
 
 .project-link {
