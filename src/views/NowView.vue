@@ -1,28 +1,46 @@
 <script setup lang="ts">
 import { useStatusPage } from '@/composables/useStatusPage'
+import { useAnkiStats } from '@/composables/useAnkiStats'
 import AnkiStats from '@/components/AnkiStats.vue'
+import AnkiDiscordCard from '@/components/AnkiDiscordCard.vue'
+import HomelabTerminal from '@/components/HomelabTerminal.vue'
+import { useI18n } from '@/i18n'
 
 const { statusData } = useStatusPage()
+const { stats } = useAnkiStats()
+const { t } = useI18n()
 </script>
 
 <template>
   <main class="container page">
-    <h1 class="page-title">Now</h1>
-    <p class="page-subtitle">What I'm up to these days.</p>
+    <h1 class="page-title">{{ t('now.title') }}</h1>
+    <p class="page-subtitle">{{ t('now.subtitle') }}</p>
+
+    <section class="section">
+      <h2 class="section-title">{{ t('now.status') }}</h2>
+      <!-- Persistent rich presence: stays visible when Anki is closed,
+           just without any activity -->
+      <AnkiDiscordCard v-if="stats?.presence" :presence="stats.presence" />
+      <div v-else class="waiting-card">
+        <p class="empty">{{ t('now.statusWaiting') }}</p>
+      </div>
+    </section>
 
     <AnkiStats />
 
+    <HomelabTerminal />
+
     <section class="section">
-      <h2 class="section-title">Goals</h2>
+      <h2 class="section-title">{{ t('now.goals') }}</h2>
       <ul class="item-list">
-        <li v-for="(goal, i) in statusData.goals" :key="i" class="item">{{ goal }}</li>
+        <li v-for="(goal, i) in statusData.goals" :key="i" class="item">{{ t(goal) }}</li>
       </ul>
     </section>
 
     <section class="section">
-      <h2 class="section-title">Interests</h2>
+      <h2 class="section-title">{{ t('now.interests') }}</h2>
       <ul class="item-list">
-        <li v-for="(interest, i) in statusData.interests" :key="i" class="item">{{ interest }}</li>
+        <li v-for="(interest, i) in statusData.interests" :key="i" class="item">{{ t(interest) }}</li>
       </ul>
     </section>
   </main>
@@ -76,5 +94,16 @@ const { statusData } = useStatusPage()
   position: absolute;
   left: 0;
   color: var(--text-muted);
+}
+
+.waiting-card {
+  padding: 1rem;
+  border: 1px dashed var(--border-subtle);
+  border-radius: 6px;
+}
+
+.empty {
+  color: var(--text-muted);
+  font-size: 0.6875rem;
 }
 </style>

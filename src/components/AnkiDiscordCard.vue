@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useI18n } from '@/i18n'
 
 interface Presence {
   status: 'online' | 'offline'
@@ -13,6 +14,7 @@ const props = defineProps<{
   presence: Presence
 }>()
 
+const { t } = useI18n()
 const now = ref(Date.now())
 let ticker: ReturnType<typeof setInterval> | null = null
 
@@ -41,9 +43,9 @@ const elapsedTime = computed(() => {
 </script>
 
 <template>
-  <div class="discord-activity-card">
+  <div class="discord-activity-card" :class="{ offline: presence.status !== 'online' }">
     <div class="card-header">
-      <span class="header-label">PLAYING A GAME</span>
+      <span class="header-label">{{ presence.status === 'online' ? t('ankiCard.playing') : t('ankiCard.offline') }}</span>
     </div>
 
     <div class="activity-body">
@@ -57,8 +59,9 @@ const elapsedTime = computed(() => {
         </svg>
 
         <!-- Badge status icon -->
-        <div class="status-badge" :title="presence.icon">
-          <span v-if="presence.icon === 'zzz'" class="badge-text">💤</span>
+        <div class="status-badge" :title="presence.status === 'online' ? presence.icon : 'offline'">
+          <span v-if="presence.status !== 'online'" class="badge-offline" aria-label="offline" />
+          <span v-else-if="presence.icon === 'zzz'" class="badge-text">💤</span>
           <span v-else-if="presence.icon === 'search'" class="badge-text">🔍</span>
           <span v-else-if="presence.icon === 'tick-dark'" class="badge-text">✓</span>
           <span v-else class="badge-text">⋯</span>
@@ -68,12 +71,17 @@ const elapsedTime = computed(() => {
       <!-- Right details text -->
       <div class="activity-info">
         <div class="app-title">Anki</div>
-        <div class="app-state">{{ presence.state || 'Chilling in the menus' }}</div>
-        <div class="app-details">{{ presence.details || 'Studying' }}</div>
-        <div class="app-time">
-          <span class="gamepad-icon">🎮</span>
-          <span class="timer-text">{{ elapsedTime }} elapsed</span>
-        </div>
+        <template v-if="presence.status === 'online'">
+          <div class="app-state">{{ presence.state || t('ankiCard.chilling') }}</div>
+          <div class="app-details">{{ presence.details || t('ankiCard.studying') }}</div>
+          <div class="app-time">
+            <span class="gamepad-icon">🎮</span>
+            <span class="timer-text">{{ t('ankiCard.elapsed', { time: elapsedTime }) }}</span>
+          </div>
+        </template>
+        <template v-else>
+          <div class="app-state idle">{{ t('ankiCard.notStudying') }}</div>
+        </template>
       </div>
     </div>
   </div>
@@ -140,6 +148,25 @@ const elapsedTime = computed(() => {
 .badge-text {
   font-size: 10px;
   line-height: 1;
+}
+
+.badge-offline {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #80848e;
+}
+
+.discord-activity-card.offline .anki-logo {
+  filter: grayscale(0.6) brightness(0.8);
+}
+
+.discord-activity-card.offline .header-label {
+  color: #80848e;
+}
+
+.app-state.idle {
+  color: #949ba4;
 }
 
 .activity-info {

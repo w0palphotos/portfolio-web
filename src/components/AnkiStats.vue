@@ -1,25 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import AnkiDiscordCard from './AnkiDiscordCard.vue'
+import { useAnkiStats } from '@/composables/useAnkiStats'
+import { useI18n } from '@/i18n'
 
-interface Presence {
-  status: 'online' | 'offline'
-  state?: string
-  details?: string
-  startedAt?: number
-  icon?: string
-}
-
-interface AnkiStats {
-  today: number
-  totalReviews: number
-  totalCards?: number
-  currentStreak: number
-  days: [string, number][]
-  updatedAt: string
-  topDeck?: { name: string } | string
-  presence?: Presence
-}
+const { t, locale } = useI18n()
 
 interface Cell {
   date: string
@@ -27,7 +11,7 @@ interface Cell {
   future: boolean
 }
 
-const stats = ref<AnkiStats | null>(null)
+const { stats, loading } = useAnkiStats()
 const displayStreak = computed(() => {
   if (stats.value?.currentStreak && stats.value.currentStreak > 0) return stats.value.currentStreak
   if (!stats.value?.days?.length) return 0
@@ -40,8 +24,15 @@ const displayStreak = computed(() => {
   }
   return streak
 })
-const loading = ref(true)
-let pollTimer: ReturnType<typeof setInterval> | null = null
+
+// On mobile/tablet the graph starts at the first reviewed day (the dotted
+// range), not a full year of mostly-empty cells. The grid still fluid-fits
+// the container width so it never scrolls.
+const isMobile = ref(false)
+let mq: MediaQueryList | null = null
+function onMqChange(e: MediaQueryListEvent) {
+  isMobile.value = e.matches
+}
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const dayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', '']
@@ -55,6 +46,15 @@ function toISO(d: Date) {
 
 const map = computed(() => new Map((stats.value?.days ?? []).map(([d, n]) => [d, n])))
 
+// Oldest day with reviews (days are newest-first); fallback to oldest entry
+const firstActiveDate = computed(() => {
+  const days = stats.value?.days ?? []
+  for (let i = days.length - 1; i >= 0; i--) {
+    if (days[i][1] > 0) return days[i][0]
+  }
+  return days.length ? days[days.length - 1][0] : null
+})
+
 const todayDate = new Date()
 todayDate.setHours(0, 0, 0, 0)
 
@@ -62,7 +62,14 @@ const weeks = computed<Cell[][]>(() => {
   const end = new Date(todayDate)
   end.setDate(end.getDate() + (6 - end.getDay()))
   const start = new Date(end)
-  start.setDate(start.getDate() - 52 * 7 - 6)
+  if (isMobile.value && firstActiveDate.value) {
+    // Mobile/tablet: start at the week of the first reviewed day
+    start.setTime(new Date(firstActiveDate.value + 'T00:00:00').getTime())
+    start.setDate(start.getDate() - start.getDay())
+    if (start.getTime() > end.getTime()) start.setTime(end.getTime())
+  } else {
+    start.setDate(start.getDate() - 52 * 7 - 6)
+  }
 
   const cols: Cell[][] = []
   const cur = new Date(start)
@@ -117,7 +124,17 @@ const totalYear = computed(() => weeks.value.flat().reduce((s, c) => s + (c.futu
 const updated = computed(() => {
   if (!stats.value?.updatedAt) return ''
   const d = new Date(stats.value.updatedAt)
-  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString()
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString(locale.value === 'ja' ? 'ja-JP' : 'en-US')
+})
+
+const summaryText = computed(() => {
+  const s = stats.value
+  if (!s) return ''
+  const vars = { streak: displayStreak.value, today: s.today }
+  if (s.totalCards) {
+    return t('now.ankiSummary', { cards: s.totalCards.toLocaleString(), ...vars })
+  }
+  return t('now.ankiSummaryNoCards', vars)
 })
 
 function title(c: Cell) {
@@ -125,48 +142,26 @@ function title(c: Cell) {
   return `${n} review${n === 1 ? '' : 's'} on ${c.date}`
 }
 
-async function loadStats() {
-  const api = import.meta.env.VITE_ANKI_API || '/api/anki'
-
-  try {
-    const res = await fetch(api, { cache: 'no-store' })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const data = await res.json()
-    if (Array.isArray(data.days)) {
-      stats.value = data
-      loading.value = false
-    }
-  } catch {
-    // If not yet pushed, remains loading or shows waiting state
-  }
-}
-
 onMounted(() => {
-  loadStats()
-  pollTimer = setInterval(loadStats, 3_000)
+  mq = window.matchMedia('(max-width: 767px)')
+  isMobile.value = mq.matches
+  mq.addEventListener('change', onMqChange)
 })
 
 onUnmounted(() => {
-  if (pollTimer) clearInterval(pollTimer)
+  mq?.removeEventListener('change', onMqChange)
 })
 </script>
 
 <template>
   <section class="section anki">
-    <!-- Live Discord Presence Card when Anki is active on your device -->
-    <AnkiDiscordCard v-if="stats?.presence?.status === 'online'" :presence="stats.presence" />
-
     <div class="head">
-      <h2 class="section-title">Anki</h2>
+      <h2 class="section-title">{{ t('now.anki') }}</h2>
     </div>
 
     <!-- Live Stats from Anki -->
     <template v-if="stats && stats.days.length">
-      <p class="summary">
-        <template v-if="stats.totalCards">{{ stats.totalCards.toLocaleString() }} cards · </template>
-        {{ displayStreak }} day streak
-        · {{ stats.today }} today
-      </p>
+      <p class="summary">{{ summaryText }}</p>
 
       <div class="heat-wrap">
         <div class="heat" :style="{ '--cols': weeks.length }">
@@ -202,11 +197,11 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <p v-if="updated" class="updated">Synced from Anki {{ updated }}</p>
+      <p v-if="updated" class="updated">{{ t('now.synced', { date: updated }) }}</p>
     </template>
 
     <div v-else class="waiting-card">
-      <p class="empty">Waiting for Anki sync… Open Anki to broadcast streak and review stats directly.</p>
+      <p class="empty">{{ t('now.ankiWaiting') }}</p>
     </div>
   </section>
 </template>
@@ -232,21 +227,22 @@ onUnmounted(() => {
 }
 
 .heat-wrap {
-  overflow-x: auto;
+  width: 100%;
+  overflow: hidden;
   padding-bottom: 0.25rem;
 }
 
 .heat {
-  --size: 10px;
-  --gap: 3px;
+  --gap: clamp(1px, 0.5vw, 3px);
   --h0: var(--bg-surface);
   --h1: color-mix(in srgb, var(--accent) 22%, var(--bg-surface));
   --h2: color-mix(in srgb, var(--accent) 45%, var(--bg-surface));
   --h3: color-mix(in srgb, var(--accent) 72%, var(--bg-surface));
   --h4: var(--accent);
-  display: inline-grid;
-  grid-template-columns: auto repeat(var(--cols), var(--size));
-  grid-template-rows: auto repeat(7, var(--size));
+  display: grid;
+  width: 100%;
+  grid-template-columns: auto repeat(var(--cols), minmax(0, 1fr));
+  grid-template-rows: auto repeat(7, auto);
   gap: var(--gap);
   font-size: 10px;
   color: var(--text-muted);
@@ -267,15 +263,31 @@ onUnmounted(() => {
 
 .days span {
   grid-column: 1;
-  line-height: var(--size);
+  align-self: center;
+  line-height: 1;
   padding-right: 6px;
 }
 
 .cell {
-  width: var(--size);
-  height: var(--size);
   border-radius: 2px;
   box-sizing: border-box;
+}
+
+.grid .cell {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+/* Very small screens: drop the day-label gutter and shrink month labels so
+   the full year fits without horizontal scrolling. */
+@media (max-width: 480px) {
+  .days {
+    display: none;
+  }
+
+  .heat {
+    font-size: 8px;
+  }
 }
 
 .cell.l0 { background: var(--h0); box-shadow: inset 0 0 0 1px var(--border-subtle); }
@@ -295,6 +307,8 @@ onUnmounted(() => {
 
 .legend .cell {
   display: inline-block;
+  width: 10px;
+  height: 10px;
 }
 
 .updated,
