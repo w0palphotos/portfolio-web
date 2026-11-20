@@ -11,6 +11,7 @@ interface ImportMetaEnv {
   readonly VITE_LASTFM_API_KEY: string
   readonly VITE_MEDIUM_USERNAME: string
   readonly VITE_ANKI_API?: string
+  readonly VITE_HOMELAB_API?: string
 }
 
 interface ImportMeta {
