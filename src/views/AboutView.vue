@@ -3,9 +3,20 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useAboutPage } from '@/composables/useAboutPage'
 import { machines } from '@/data/about'
 import { useI18n } from '@/i18n'
+import { useLightbox, type LightboxItem } from '@/composables/useLightbox'
 
 const { aboutData } = useAboutPage()
 const { t } = useI18n()
+const lightbox = useLightbox()
+const gallery: LightboxItem[] = [
+  { src: '/images/fujifilm-x-t10.webp', alt: 'about.photoAlt', width: 1067, height: 1600, note: 'about.photoCaption' },
+  { src: '/images/desk-setup.webp', alt: 'about.deskAlt1', width: 1600, height: 1200 },
+  { src: '/images/homelab-desk.webp', alt: 'about.deskAlt2', width: 1600, height: 1200 },
+  { src: '/images/laptop-setup.webp', alt: 'about.laptopAlt', width: 1600, height: 1200 },
+]
+function openImage(index: number) {
+  lightbox.show(gallery, index)
+}
 
 interface Usage { used: number; total: number }
 interface HomelabStats {
@@ -124,7 +135,9 @@ function linkParts(text: string): { text: string; to: string | null }[] {
           </template>
         </p>
         <figure v-else-if="para === 'about.cameraPhoto'" class="camera-photo">
-          <img src="/images/fujifilm-x-t10.webp" :alt="t('about.photoAlt')" loading="lazy" width="1067" height="1600" />
+          <button type="button" class="picture-trigger" :aria-label="t('lightbox.open')" @click="openImage(0)">
+            <img src="/images/fujifilm-x-t10.webp" :alt="t('about.photoAlt')" loading="lazy" width="1067" height="1600" />
+          </button>
           <figcaption v-if="t('about.photoCaption')">{{ t('about.photoCaption') }}</figcaption>
         </figure>
       </template>
@@ -171,13 +184,19 @@ function linkParts(text: string): { text: string; to: string | null }[] {
       <h2 class="section-title">{{ t('about.desk') }}</h2>
       <div class="desk-photos">
         <figure class="wide">
-          <img src="/images/desk-setup.webp" :alt="t('about.deskAlt1')" loading="lazy" width="1600" height="1200" />
+          <button type="button" class="picture-trigger" :aria-label="t('lightbox.open')" @click="openImage(1)">
+            <img src="/images/desk-setup.webp" :alt="t('about.deskAlt1')" loading="lazy" width="1600" height="1200" />
+          </button>
         </figure>
         <figure>
-          <img src="/images/homelab-desk.webp" :alt="t('about.deskAlt2')" loading="lazy" width="1600" height="1200" />
+          <button type="button" class="picture-trigger" :aria-label="t('lightbox.open')" @click="openImage(2)">
+            <img src="/images/homelab-desk.webp" :alt="t('about.deskAlt2')" loading="lazy" width="1600" height="1200" />
+          </button>
         </figure>
         <figure>
-          <img src="/images/laptop-setup.webp" :alt="t('about.laptopAlt')" loading="lazy" width="1600" height="1200" />
+          <button type="button" class="picture-trigger" :aria-label="t('lightbox.open')" @click="openImage(3)">
+            <img src="/images/laptop-setup.webp" :alt="t('about.laptopAlt')" loading="lazy" width="1600" height="1200" />
+          </button>
         </figure>
       </div>
     </section>
@@ -238,6 +257,20 @@ function linkParts(text: string): { text: string; to: string | null }[] {
 
 .camera-photo {
   margin: 0 0 1rem;
+}
+
+.picture-trigger {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.picture-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .camera-photo img {

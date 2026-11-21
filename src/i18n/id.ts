@@ -252,5 +252,18 @@ export default {
       "q3_2024_laptop": "Laptop dengan Arch Linux LTS dan Sway",
       "q2_2026_laptop": "Laptop dengan Bluefin Linux"
     }
+  },
+  "lightbox": {
+    "title": "Pratinjau gambar",
+    "open": "Buka gambar",
+    "close": "Tutup pratinjau",
+    "zoom": "Perbesar",
+    "reset": "Kembalikan zoom",
+    "prev": "Gambar sebelumnya",
+    "next": "Gambar berikutnya",
+    "zoomIn": "Perbesar",
+    "zoomOut": "Perkecil",
+    "prevShort": "Sebelumnya",
+    "nextShort": "Berikutnya"
   }
 }

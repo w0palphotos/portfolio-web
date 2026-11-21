@@ -5,9 +5,16 @@ import { ArrowLeft, Calendar, Tag, User, ExternalLink } from 'lucide-vue-next'
 import { blogPosts, type BlogPost } from '@/data/blog-posts'
 import { useMediumPosts } from '@/composables/useMediumPosts'
 import { useI18n } from '@/i18n'
+import { useLightbox } from '@/composables/useLightbox'
 
 const route = useRoute()
 const { t } = useI18n()
+const lightbox = useLightbox()
+
+function openCover() {
+  if (!post.value?.coverImage) return
+  lightbox.show([{ src: post.value.coverImage, alt: post.value.title }], 0)
+}
 const post = ref<BlogPost | null>(null)
 const notFound = ref(false)
 
@@ -128,7 +135,9 @@ watch(
 
         <article>
           <div v-if="post.coverImage" class="cover-image">
-            <img :src="post.coverImage" :alt="post.title" />
+            <button type="button" class="picture-trigger" :aria-label="t('lightbox.open')" @click="openCover">
+              <img :src="post.coverImage" :alt="post.title" />
+            </button>
           </div>
 
           <h1 class="post-title">{{ post.title }}</h1>
@@ -203,6 +212,21 @@ watch(
   border-radius: 0.5rem;
   overflow: hidden;
   margin-bottom: 2rem;
+}
+
+.cover-image .picture-trigger {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.cover-image .picture-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .cover-image img {

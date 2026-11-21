@@ -252,5 +252,18 @@ export default {
       "q3_2024_laptop": "Arch Linux LTSとSwayのノートPC",
       "q2_2026_laptop": "Bluefin Linuxを動かすノートPC"
     }
+  },
+  "lightbox": {
+    "title": "画像プレビュー",
+    "open": "画像を開く",
+    "close": "プレビューを閉じる",
+    "zoom": "拡大",
+    "reset": "ズームを戻す",
+    "prev": "前の画像",
+    "next": "次の画像",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "prevShort": "前へ",
+    "nextShort": "次へ"
   }
 }

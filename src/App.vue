@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
+import ImageLightbox from '@/components/ImageLightbox.vue'
 import { useI18n } from '@/i18n'
 
 const route = useRoute()
@@ -37,6 +38,7 @@ const lastfmApiKey = import.meta.env.VITE_LASTFM_API_KEY || ''
         {{ t('lang.note') }}
       </footer>
     </div>
+    <ImageLightbox />
   </div>
 </template>
 

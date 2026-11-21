@@ -252,5 +252,18 @@ export default {
       "q3_2024_laptop": "Laptop with Arch Linux LTS and Sway",
       "q2_2026_laptop": "Laptop with Bluefin Linux"
     }
+  },
+  "lightbox": {
+    "title": "Image preview",
+    "open": "Open image",
+    "close": "Close preview",
+    "zoom": "Zoom in",
+    "reset": "Reset zoom",
+    "prev": "Previous image",
+    "next": "Next image",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "prevShort": "Previous",
+    "nextShort": "Next"
   }
 }

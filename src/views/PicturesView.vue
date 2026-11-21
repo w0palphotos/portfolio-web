@@ -1,8 +1,15 @@
 <script setup lang="ts">
-import { pictureGroups } from '@/data/pictures'
+import { pictureGroups, type Picture } from '@/data/pictures'
+import { useLightbox } from '@/composables/useLightbox'
 import { useI18n } from '@/i18n'
 
 const { t } = useI18n()
+const lightbox = useLightbox()
+const shots: Picture[] = pictureGroups.flatMap((group) => group.items)
+
+function open(shot: Picture) {
+  lightbox.show(shots, shots.indexOf(shot))
+}
 </script>
 
 <template>
@@ -19,13 +26,20 @@ const { t } = useI18n()
           class="picture"
           :class="{ 'picture-phone': shot.portrait }"
         >
-          <img
-            :src="shot.src"
-            :alt="t(shot.alt)"
-            :width="shot.width"
-            :height="shot.height"
-            loading="lazy"
-          />
+          <button
+            type="button"
+            class="picture-trigger"
+            :aria-label="t('lightbox.open')"
+            @click="open(shot)"
+          >
+            <img
+              :src="shot.src"
+              :alt="t(shot.alt)"
+              :width="shot.width"
+              :height="shot.height"
+              loading="lazy"
+            />
+          </button>
           <figcaption v-if="shot.note" class="picture-note">{{ t(shot.note) }}</figcaption>
         </figure>
       </div>
@@ -71,6 +85,20 @@ const { t } = useI18n()
   margin: 0;
 }
 
+.picture-trigger {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.picture-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .picture img {
   display: block;
   width: 100%;
@@ -80,7 +108,7 @@ const { t } = useI18n()
   background: var(--bg-surface);
 }
 
-.picture-phone img {
+.picture-phone .picture-trigger {
   max-width: min(100%, 18rem);
   margin-inline: 0;
 }
