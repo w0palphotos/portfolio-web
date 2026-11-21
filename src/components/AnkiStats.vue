@@ -192,9 +192,9 @@ onUnmounted(() => {
         </div>
 
         <div class="legend" aria-hidden="true">
-          <span>Less</span>
+          <span>{{ t('ankiCard.less') }}</span>
           <i class="cell l0" /><i class="cell l1" /><i class="cell l2" /><i class="cell l3" /><i class="cell l4" />
-          <span>More</span>
+          <span>{{ t('ankiCard.more') }}</span>
         </div>
       </div>
 

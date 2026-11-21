@@ -4,8 +4,10 @@ import { useRoute } from 'vue-router'
 import { ArrowLeft, Calendar, Tag, User, ExternalLink } from 'lucide-vue-next'
 import { blogPosts, type BlogPost } from '@/data/blog-posts'
 import { useMediumPosts } from '@/composables/useMediumPosts'
+import { useI18n } from '@/i18n'
 
 const route = useRoute()
+const { t } = useI18n()
 const post = ref<BlogPost | null>(null)
 const notFound = ref(false)
 
@@ -108,9 +110,9 @@ watch(
 <template>
   <div>
     <div v-if="notFound" class="container" style="padding: 3rem 1.5rem; text-align: center">
-      <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem">Post Not Found</h1>
+      <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem">{{ t('blogDetail.notFound') }}</h1>
       <router-link to="/blog" style="color: var(--accent); text-decoration: underline; font-size: 0.9375rem">
-        Back to Blog
+        {{ t('blogDetail.back') }}
       </router-link>
     </div>
 
@@ -121,7 +123,7 @@ watch(
           class="back-link"
         >
           <ArrowLeft :size="16" />
-          <span>Back to Blog</span>
+          <span>{{ t('blogDetail.back') }}</span>
         </router-link>
 
         <article>
@@ -147,7 +149,7 @@ watch(
               </div>
             </div>
             <span class="source-pill" :class="{ medium: isMedium }">
-              {{ isMedium ? 'Medium' : 'Local' }}
+              {{ isMedium ? 'Medium' : t('blogDetail.local') }}
             </span>
           </div>
 
@@ -156,14 +158,14 @@ watch(
               <div class="prose-content" v-html="formattedContent" />
               <div class="fade-overlay" />
               <div class="read-more-card">
-                <p>This article was published on Medium. Click below to read the full version.</p>
+                <p>{{ t('blogDetail.mediumNotice') }}</p>
                 <a
                   :href="post.originalLink || '#'"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="read-more-btn"
                 >
-                  <span>Read full article on Medium</span>
+                  <span>{{ t('blogDetail.readOnMedium') }}</span>
                   <ExternalLink :size="16" />
                 </a>
               </div>

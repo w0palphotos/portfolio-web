@@ -1,10 +1,11 @@
 import { reactive, toRef } from 'vue'
 import en from './en'
 import ja from './ja'
+import id from './id'
 
-export type Locale = 'en' | 'ja'
+export type Locale = 'en' | 'id' | 'ja'
 
-const dicts: Record<Locale, unknown> = { en, ja }
+const dicts: Record<Locale, unknown> = { en, id, ja }
 const STORAGE_KEY = 'locale-preference'
 
 export const i18n = reactive<{ locale: Locale }>({ locale: 'en' })
@@ -51,7 +52,13 @@ export function initLocale() {
   }
   const nav = typeof navigator !== 'undefined' ? navigator.language : 'en'
   const locale: Locale =
-    stored === 'en' || stored === 'ja' ? stored : nav.toLowerCase().startsWith('ja') ? 'ja' : 'en'
+    stored === 'en' || stored === 'id' || stored === 'ja'
+      ? stored
+      : nav.toLowerCase().startsWith('id')
+        ? 'id'
+        : nav.toLowerCase().startsWith('ja')
+          ? 'ja'
+          : 'en'
   setLocale(locale)
 }
 
@@ -60,6 +67,6 @@ export function useI18n() {
     t,
     locale: toRef(i18n, 'locale'),
     setLocale,
-    toggle: () => setLocale(i18n.locale === 'en' ? 'ja' : 'en'),
+    toggle: () => setLocale(i18n.locale === 'en' ? 'id' : i18n.locale === 'id' ? 'ja' : 'en'),
   }
 }
