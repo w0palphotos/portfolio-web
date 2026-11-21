@@ -241,11 +241,38 @@ const memGetIp = new Map()
 let memGetWindow = { count: 0, resetAt: 0 }
 const memNegative = new Map()
 const GET_IP_MAX_PER_SEC = 5
-const GET_INSTANCE_MAX_PER_SEC = 50
+const GET_INSTANCE_MAX_PER_SEC = 20  // tighter: was 50, now 20/s (1.7M/day max)
 const NEGATIVE_TTL_MS = 2000
+
+// Daily Redis command budget breaker: stops calling Redis when near daily quota.
+// Upstash free tier = 10k commands/day. We track estimated usage and stop
+// calling Redis when we hit 80% (8k), serving from memory or returning 429.
+let dailyBudget = { used: 0, resetAt: Date.now() + 86400000, limit: 8000 }
+const BUDGET_WARN_THRESHOLD = 0.8
+const BUDGET_CRITICAL_THRESHOLD = 0.95
+
+function budgetCheck() {
+  const now = Date.now()
+  if (now >= dailyBudget.resetAt) {
+    dailyBudget = { used: 0, resetAt: now + 86400000, limit: 8000 }
+  }
+  const pct = dailyBudget.used / dailyBudget.limit
+  if (pct >= BUDGET_CRITICAL_THRESHOLD) return 'critical'
+  if (pct >= BUDGET_WARN_THRESHOLD) return 'warn'
+  return 'ok'
+}
+
+function budgetIncrement(n) {
+  dailyBudget.used += n
+}
+
+function budgetBreakerOpen() {
+  return budgetCheck() === 'critical'
+}
 
 async function redis(command) {
   if (breakerOpen()) throw new Error('circuit open')
+  if (budgetBreakerOpen()) throw new Error('budget exhausted')
   try {
     const res = await fetch(redisUrl, {
       method: 'POST',
@@ -260,6 +287,7 @@ async function redis(command) {
     const json = await res.json()
     if (json.error) throw new Error(json.error)
     redisOk()
+    budgetIncrement(1)
     return json.result
   } catch (err) {
     redisFail()
@@ -272,8 +300,10 @@ const hasRedis = () => Boolean(redisUrl && redisToken)
 async function enqueue(job) {
   if (hasRedis()) {
     const len = await redis(['LLEN', QUEUE_KEY])
+    budgetIncrement(1)
     if (len >= MAX_QUEUE) return false
     await redis(['RPUSH', QUEUE_KEY, JSON.stringify(job)])
+    budgetIncrement(1)
     return true
   }
   if (memQueue.length >= MAX_QUEUE) return false
@@ -285,6 +315,7 @@ async function dequeue() {
   if (hasRedis()) {
     // Block up to 5s so the worker wakes immediately on new jobs
     const res = await redis(['BLPOP', QUEUE_KEY, '5'])
+    budgetIncrement(1)
     if (!res) return null
     try {
       return JSON.parse(res[1])
@@ -298,6 +329,7 @@ async function dequeue() {
 async function setResult(id, result) {
   if (hasRedis()) {
     await redis(['SET', RESULT_PREFIX + id, JSON.stringify(result), 'EX', String(RESULT_TTL_S)])
+    budgetIncrement(1)
     return
   }
   memResults.set(id, { ...result, expiresAt: Date.now() + RESULT_TTL_S * 1000 })
@@ -306,6 +338,7 @@ async function setResult(id, result) {
 async function getResult(id) {
   if (hasRedis()) {
     const raw = await redis(['GET', RESULT_PREFIX + id])
+    budgetIncrement(1)
     return raw ? JSON.parse(raw) : null
   }
   const entry = memResults.get(id)
@@ -322,7 +355,9 @@ async function rateLimited(ip) {
   if (hasRedis()) {
     const key = RL_PREFIX + ip
     const count = await redis(['INCR', key])
+    budgetIncrement(1)
     if (count === 1) await redis(['EXPIRE', key, '2'])
+    budgetIncrement(1)
     return count > 1
   }
   const now = Date.now()
@@ -339,7 +374,9 @@ async function rateLimited(ip) {
 async function globalRateLimited() {
   if (hasRedis()) {
     const count = await redis(['INCR', GLOBAL_RL_KEY])
+    budgetIncrement(1)
     if (count === 1) await redis(['EXPIRE', GLOBAL_RL_KEY, '60'])
+    budgetIncrement(1)
     return count > GLOBAL_MAX_PER_MIN
   }
   const now = Date.now()
@@ -352,6 +389,7 @@ async function globalRateLimited() {
 async function topOnCooldown() {
   if (hasRedis()) {
     const ok = await redis(['SET', TOP_CD_KEY, '1', 'NX', 'EX', String(TOP_COOLDOWN_S)])
+    budgetIncrement(1)
     return ok === null
   }
   const now = Date.now()
