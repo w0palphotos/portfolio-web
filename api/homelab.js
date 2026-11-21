@@ -5,9 +5,17 @@
 // The lab is considered offline when no push arrived within OFFLINE_AFTER_MS
 // (powered off, asleep, or network down) — the frontend then shows
 // "the homelab is turned off".
+// With HOMELAB_LOCAL_STORE=1 the dev API reads/writes a local JSON file so the
+// collector never spends Upstash commands. Vercel proxies GET to that file.
+
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 
 const KEY = 'homelab:stats'
 const OFFLINE_AFTER_MS = 90_000
+const localStore = process.env.HOMELAB_LOCAL_STORE === '1'
+  ? resolve(process.env.HOMELAB_STORE_PATH || '.data/homelab.json')
+  : null
 
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
@@ -21,6 +29,13 @@ let memo = { data: null, at: 0 }
 const breaker = { failures: 0, openUntil: 0 }
 
 async function kvGet() {
+  if (localStore) {
+    try {
+      return JSON.parse(readFileSync(localStore, 'utf8'))
+    } catch {
+      return inMemoryStats
+    }
+  }
   const now = Date.now()
   if (memo.data && now - memo.at < 2000) return memo.data
   if (redisUrl && redisToken && now >= breaker.openUntil) {
@@ -54,6 +69,11 @@ async function kvGet() {
 async function kvSet(data) {
   inMemoryStats = data
   memo = { data, at: Date.now() }
+  if (localStore) {
+    mkdirSync(dirname(localStore), { recursive: true })
+    writeFileSync(localStore, JSON.stringify(data))
+    return
+  }
   if (redisUrl && redisToken) {
     try {
       await fetch(redisUrl, {

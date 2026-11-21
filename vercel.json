@@ -8,16 +8,16 @@
       "destination": "/api/anki"
     },
     {
-      "source": "/api/homelab",
-      "destination": "/api/homelab"
-    },
-    {
       "source": "/api/terminal",
       "destination": "/api/terminal"
     },
     {
       "source": "/api/lastfm",
       "destination": "/api/lastfm"
+    },
+    {
+      "source": "/api/homelab",
+      "destination": "https://takamatsu.tailb43e01.ts.net/homelab-status"
     },
     {
       "source": "/api/(.*)",
