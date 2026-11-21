@@ -6,7 +6,8 @@ export default {
     "about": "About",
     "bio": "Bio",
     "now": "Now",
-    "terminal": "Terminal"
+    "terminal": "Terminal",
+    "pictures": "Pictures"
   },
   "lang": {
     "switch": "Switch language",
@@ -15,9 +16,7 @@ export default {
   },
   "home": {
     "greeting": "hey, i'm w0pal.",
-    "tagline": "informatics, linux, and street photography.",
-    "bio1": "I like building things, breaking stuff (sometimes), and figuring out how things work. Most of what I build comes from curiosity: trying to solve my own problems or exploring ideas that seem interesting at the time. Some of it turns into websites, software, scripts, and Linux customization.",
-    "bio2": "Outside of that, I take street photos, binge anime, and occasionally spend time on PC building."
+    "bio1": "I'm a final-year informatics engineering student at Nusa Putra University. I dig into things, especially the technical side, but I learn slowly and by doing. Most of what I know comes from trying, experimenting, and getting things wrong more than once."
   },
   "bio": {
     "title": "Biography",
@@ -32,14 +31,14 @@ export default {
   },
   "about": {
     "title": "About",
-    "subtitle": "Someone obsessed with Linux.",
+    "subtitle": "A person who's really into Linux.",
     "intro1": "I'm w0pal (Naufal), a final-year informatics engineering student at Nusa Putra University. It started when I built my first PC in 2020.",
     "introLinux": "My first Linux desktop was on an old laptop I wanted to bring back to life, the same one I used for college. I asked a friend on campus which distro to use and tried his suggestion. Not long after, the laptop smelled like smoke and stopped booting. I needed a new one. I had already done the reading, so I installed Linux on the replacement and removed the Windows 11 it came with.",
     "introPhoto": "Photography started for me on social media. Later I became a documentation officer in a campus organisation. I did not see it as a career path, so I sold the camera. It stayed with me for a while, and I even joked about calling it my girlfriend. Here is a photo I took with it:",
     "photoCaption": "A photo I took with the Fujifilm X-T10.",
-    "cameraAfter": "The camera was a Fujifilm X-T10. These days, phone photos are more than enough for me.",
+    "cameraAfter": "The camera was a Fujifilm X-T10. These days, using my phone for everyday shots is more than enough.",
     "introServer": "I first met Linux on the server side in 2025, when I was trusted to troubleshoot a VPS for the [[Reverse Vending Machine|/projects#reverse-vending-machine]] project. That machine ran AlmaLinux. In early 2026 I bought a modified Indihome set-top box with Armbian installed. That is where I learned self-hosting and Docker containers. I ran a few services, including AdGuard Home, Vaultwarden, and Nginx Proxy Manager. My current homelab is listed on this page with live specs, monitored from a container isolated from Docker.",
-    "introJapanese": "I study Japanese in my free time. I got into it because I like Japanese culture, especially the music. Lately I have kept at it with Anki using the Kaishi 1.5k deck. You can see my progress on the [[Anki tracker|/now]].",
+    "introJapanese": "I study Japanese in my free time. I got into it because I like Japanese culture, especially the music. Lately I have kept at it with Anki using the Kaishi 1.5k deck. You can see my progress on the [[Anki tracker|/now]]. That's why there's a Japanese option on this site.",
     "machines": "Machines",
     "desk": "Desk setup",
     "journey": "Journey",
@@ -58,7 +57,7 @@ export default {
       "eliteDesk": "Runs the Docker stack: AdGuard Home, Nginx Proxy Manager, Vaultwarden, and the live-status collectors behind this site.",
       "firstBuild": "The RAM overclocking experiment written up on Medium started on this machine.",
       "zte": "The original homelab box, a repurposed TV set-top box. Retired when the EliteDesk took over.",
-      "homelabLive": "Live specs from the collector running on this machine."
+      "homelabLive": "This homelab's specs come straight from the machine, with the collector isolated inside a Docker container."
     },
     "journeyText": {
       "y2020": "Got into PC building. Assembling, optimizing, and figuring out how the hardware works.",
@@ -92,7 +91,8 @@ export default {
     "photoAlt": "Photo taken with a Fujifilm X-T10",
     "deskAlt1": "Desk setup with two monitors and the custom PC",
     "deskAlt2": "HP EliteDesk homelab machine on the desk",
-    "laptopAlt": "Laptop setup photo"
+    "laptopAlt": "Laptop setup photo",
+    "translationNote": "(The Japanese translation is AI-generated, and my Japanese is still too limited for me to check it properly. I gave the translation one rule: avoid literal wording so it reads more naturally.)"
   },
   "projects": {
     "title": "Projects",
@@ -232,5 +232,25 @@ export default {
     "readOnMedium": "Read full article on Medium",
     "mediumNotice": "This article was published on Medium. Click below to read the full version.",
     "local": "Local"
+  },
+  "pictures": {
+    "title": "Pictures",
+    "subtitle": "A place for my random screenshots.",
+    "phoneNote": "My phone is now set to Japanese for full immersion.",
+    "alt": {
+      "q4_2026_pc": "PC desktop running Linux",
+      "q4_2026_homelab": "Homelab machine",
+      "q4_2026_laptop": "Laptop desktop",
+      "q4_2026_phone": "Smartphone screenshot",
+      "q3_2026_laptop": "Laptop running Bazzite Linux",
+      "q1_2026_pc": "PC running Fedora Silverblue",
+      "q1_2026_phone": "Smartphone running One UI 7 with Niagara Launcher",
+      "q4_2025_pc": "PC showing Windows 11 activation",
+      "q3_2025_laptop": "Laptop running Arch Linux with Hyprland",
+      "q2_2025_phone": "Smartphone with One UI 7",
+      "q2_2025_laptop": "Laptop with Arch Linux, CachyOS kernel, and Hyprland",
+      "q3_2024_laptop": "Laptop with Arch Linux LTS and Sway",
+      "q2_2026_laptop": "Laptop with Bluefin Linux"
+    }
   }
 }

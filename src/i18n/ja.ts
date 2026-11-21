@@ -6,7 +6,8 @@ export default {
     "about": "私について",
     "bio": "経歴",
     "now": "いま",
-    "terminal": "ターミナル"
+    "terminal": "ターミナル",
+    "pictures": "写真"
   },
   "lang": {
     "switch": "言語を切り替え",
@@ -15,9 +16,7 @@ export default {
   },
   "home": {
     "greeting": "はじめまして、w0palです。",
-    "tagline": "情報学、Linux、そしてストリート写真。",
-    "bio1": "ものを作ったり、（ときには）壊したり、仕組みを解き明かしたりするのが好きです。作るもののほとんどは好奇心から生まれます。自分の問題を解決してみたり、そのとき面白そうだと思ったアイデアを試してみたり。そうしてできたものが、ウェブサイトやソフトウェア、スクリプト、Linuxのカスタマイズになります。",
-    "bio2": "それ以外では、ストリート写真を撮ったり、アニメを一気見したり、たまにPC自作を楽しんだりしています。"
+    "bio1": "ヌサ・プトラ大学で情報工学を学ぶ最終学年です。技術的なことが好きで色々と掘り下げる一方、物事をゆっくり吸収するタイプでもあります。学んだことの多くは、試して、実験して、何度も失敗した経験から来ています。"
   },
   "bio": {
     "title": "経歴",
@@ -32,14 +31,14 @@ export default {
   },
   "about": {
     "title": "私について",
-    "subtitle": "Linuxに夢中な人。",
+    "subtitle": "Linuxいじりが好きな人。",
     "intro1": "ヌサ・プトラ大学で情報工学を学ぶ最終学年です。w0pal（Naufal）と申します。2020年に初めてPCを自作したところから始まりました。",
     "introLinux": "最初にLinuxデスクトップを試したのは、古いノートPCを復活させたかったからです。そのPCは大学でも使っていました。キャンパスの友人にどのディストリビューションがいいか聞き、教えてもらったものを試しました。すると間もなく、そのPCは焦げたような匂いがして起動しなくなりました。新しいPCを買う必要がありました。すでにLinuxについて調べていたので、新しいPCにインストールし、最初から入っていたWindows 11を消しました。",
     "introPhoto": "写真はSNSで知りました。その後、大学の組織で広報を担当するようになりました。キャリアにはしないと感じ、カメラを売りました。そのカメラはしばらく私の生活の一部で、彼女みたいに呼んでいたこともあります。ここに、そのカメラで撮った写真を載せます。",
-    "photoCaption": "Fujifilm X-T10で撮った写真。",
+    "photoCaption": "",
     "cameraAfter": "当時使っていたのはFujifilm X-T10です。今はスマホで撮る写真で十分だと思っています。",
     "introServer": "初めてサーバー側のLinuxに触れたのは2025年、[[リバースベンディングマシン|/projects#reverse-vending-machine]]のVPSトラブルを任されたときです。当時のOSはAlmaLinuxでした。2026年初めにArmbianが入った改造版Indihomeのセットトップボックスを買い、セルフホスティングとDockerコンテナを学びました。AdGuard Home、Vaultwarden、Nginx Proxy Managerなどを動かしています。現在のホームラボはこのページに載っていて、Dockerから切り離したコンテナを通してリアルタイムのスペックを確認できます。",
-    "introJapanese": "余暇では日本語も勉強しています。日本の文化、特に音楽が好きなのがきっかけです。AnkiのKaishi 1.5kデッキで続けていて、進捗はこちらの[[Ankiトラッカー|/now]]で見られます。",
+    "introJapanese": "余暇では日本語も勉強しています。日本の文化、特に音楽が好きなのがきっかけです。AnkiのKaishi 1.5kデッキで続けていて、進捗はこちらの[[Ankiトラッカー|/now]]で見られます。だから、このサイトには日本語の切り替えを用意しています。",
     "machines": "マシン",
     "desk": "デスク環境",
     "journey": "歩み",
@@ -58,7 +57,7 @@ export default {
       "eliteDesk": "Dockerスタックを動かしています：AdGuard Home、Nginx Proxy Manager、Vaultwarden、そしてこのサイトのライブステータスを集めるコレクターたち。",
       "firstBuild": "Mediumに書いたRAMオーバークロックの実験は、このマシンから始まりました。",
       "zte": "初代のホームラボ機。テレビのセットトップボックスの再利用です。EliteDeskに交代して引退しました。",
-      "homelabLive": "このマシン上で動くコレクターから送られる最新の情報。"
+      "homelabLive": "このホームラボの情報はマシンから直接取得され、Dockerコンテナ内で隔離されたコレクターを通して届きます。"
     },
     "journeyText": {
       "y2020": "PC自作にハマる。組み立て、最適化、そしてハードウェアの仕組みを理解すること。",
@@ -92,7 +91,8 @@ export default {
     "photoAlt": "Fujifilm X-T10で撮った写真",
     "deskAlt1": "2台のモニターと自作PCのあるデスク",
     "deskAlt2": "デスク上のHP EliteDeskホームラボ機",
-    "laptopAlt": "ノートPCの写真"
+    "laptopAlt": "ノートPCの写真",
+    "translationNote": ""
   },
   "projects": {
     "title": "プロジェクト",
@@ -157,12 +157,12 @@ export default {
     }
   },
   "ankiCard": {
-    "playing": "ゲームをプレイ中",
-    "offline": "オフライン",
-    "notStudying": "今は勉強していません",
-    "chilling": "メニューを眺めている",
-    "studying": "勉強中",
-    "elapsed": "{time} 経過",
+    "playing": "PLAYING A GAME",
+    "offline": "OFFLINE",
+    "notStudying": "Not studying right now",
+    "chilling": "Chilling in the menus",
+    "studying": "Studying",
+    "elapsed": "{time} elapsed",
     "less": "少ない",
     "more": "多い"
   },
@@ -232,5 +232,25 @@ export default {
     "readOnMedium": "Mediumで記事全文を読む",
     "mediumNotice": "この記事はMediumに掲載されています。下をクリックすると全文を読めます。",
     "local": "ローカル"
+  },
+  "pictures": {
+    "title": "写真",
+    "subtitle": "適当なスクリーンショットを置いておく場所です。",
+    "phoneNote": "今はスマホを日本語にして、どっぷり浸かっています。",
+    "alt": {
+      "q4_2026_pc": "Linuxを動かすPCのデスクトップ",
+      "q4_2026_homelab": "ホームラボのマシン",
+      "q4_2026_laptop": "ノートPCのデスクトップ",
+      "q4_2026_phone": "スマートフォンのスクリーンショット",
+      "q3_2026_laptop": "Bazzite Linuxを動かすノートPC",
+      "q1_2026_pc": "Fedora Silverblueを動かすPC",
+      "q1_2026_phone": "One UI 7とNiagara Launcherを動かすスマートフォン",
+      "q4_2025_pc": "Windows 11のアクティベーション画面",
+      "q3_2025_laptop": "Arch LinuxとHyprlandを動かすノートPC",
+      "q2_2025_phone": "One UI 7のスマートフォン",
+      "q2_2025_laptop": "Arch Linux、CachyOSカーネル、HyprlandのノートPC",
+      "q3_2024_laptop": "Arch Linux LTSとSwayのノートPC",
+      "q2_2026_laptop": "Bluefin Linuxを動かすノートPC"
+    }
   }
 }
