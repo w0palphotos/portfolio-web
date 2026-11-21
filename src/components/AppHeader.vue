@@ -32,12 +32,12 @@ function isActive(link: NavLink) {
 <template>
   <!-- Mobile top bar -->
   <header class="mobile-header">
-    <router-link to="/" class="mobile-brand">w0pal</router-link>
+    <router-link to="/" class="mobile-brand" @click="closeMobile">w0pal</router-link>
     <button
       class="hamburger"
       @click="mobileOpen = !mobileOpen"
       :aria-expanded="mobileOpen"
-      aria-label="Toggle navigation"
+      :aria-label="t('aria.toggleNav')"
     >
       <Menu v-if="!mobileOpen" :size="18" />
       <X v-else :size="18" />
@@ -57,7 +57,7 @@ function isActive(link: NavLink) {
   <aside class="sidebar" :class="{ open: mobileOpen }">
     <div class="sidebar-scroll">
       <router-link to="/" class="sidebar-brand" @click="closeMobile">w0pal</router-link>
-      <nav class="sidebar-nav" aria-label="Primary">
+      <nav class="sidebar-nav" :aria-label="t('aria.primaryNav')">
         <router-link
           v-for="link in navLinks"
           :key="link.href"
@@ -84,7 +84,7 @@ function isActive(link: NavLink) {
         class="now-playing-toggle"
         :class="{ active: nowPlayingVisible }"
         @click="emit('toggle-now-playing')"
-        aria-label="Toggle now playing"
+        :aria-label="t('aria.toggleNowPlaying')"
       >
         <Disc3 :size="14" />
         <span>{{ t('nowPlaying.toggle') }}</span>

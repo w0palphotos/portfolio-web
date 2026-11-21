@@ -4,6 +4,7 @@ import ProjectsView from '@/views/ProjectsView.vue'
 import BlogView from '@/views/BlogView.vue'
 import BlogDetailView from '@/views/BlogDetailView.vue'
 import AboutView from '@/views/AboutView.vue'
+import BioView from '@/views/BioView.vue'
 import NowView from '@/views/NowView.vue'
 import TerminalView from '@/views/TerminalView.vue'
 
@@ -34,6 +35,11 @@ const router = createRouter({
       path: '/about',
       name: 'about',
       component: AboutView,
+    },
+    {
+      path: '/bio',
+      name: 'bio',
+      component: BioView,
     },
     {
       path: '/now',
@@ -97,7 +103,8 @@ const router = createRouter({
       component: TerminalView,
     },
   ],
-  scrollBehavior() {
+  scrollBehavior(to) {
+    if (to.hash) return { el: to.hash, top: 0 }
     return { top: 0 }
   },
 })
