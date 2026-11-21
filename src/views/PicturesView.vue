@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { pictureGroups, type Picture } from '@/data/pictures'
 import { useLightbox } from '@/composables/useLightbox'
 import { useI18n } from '@/i18n'
@@ -14,8 +15,8 @@ function open(shot: Picture) {
 
 <template>
   <main class="container page">
-    <h1 class="page-title">{{ t('pictures.title') }}</h1>
-    <p class="page-subtitle">{{ t('pictures.subtitle') }}</p>
+    <h1 class="page-title"><T path="pictures.title" /></h1>
+    <p class="page-subtitle"><T path="pictures.subtitle" /></p>
 
     <section v-for="group in pictureGroups" :key="group.quarter" class="quarter">
       <h2 class="quarter-title">{{ group.quarter }}</h2>
@@ -40,7 +41,7 @@ function open(shot: Picture) {
               loading="lazy"
             />
           </button>
-          <figcaption v-if="shot.note" class="picture-note">{{ t(shot.note) }}</figcaption>
+          <figcaption v-if="shot.note" class="picture-note"><T :path="shot.note" /></figcaption>
         </figure>
       </div>
     </section>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from '@/i18n'
 
@@ -247,7 +248,7 @@ const lastSeenText = computed(() => agoText(stats.value?.lastSeen || stats.value
 
 <template>
   <section class="section homelab">
-    <h2 class="section-title">{{ t('now.homelab') }}</h2>
+    <h2 class="section-title"><T path="now.homelab" /></h2>
 
     <div ref="fetchBox" class="fetchbox" :style="{ fontSize: fontSize + 'px' }" :aria-label="state === 'online' ? 'Live fastfetch output from the homelab' : 'Homelab status (offline)'">
       <template v-if="state === 'online' && stats">
@@ -268,12 +269,12 @@ const lastSeenText = computed(() => agoText(stats.value?.lastSeen || stats.value
       </template>
 
       <template v-else-if="state === 'offline'">
-        <p class="err">{{ t('homelab.offline') }}</p>
-        <p v-if="lastSeenText" class="hint">{{ t('homelab.lastSeen', { time: lastSeenText }) }}</p>
+        <p class="err"><T path="homelab.offline" /></p>
+        <p v-if="lastSeenText" class="hint"><T path="homelab.lastSeen" :vars="{ time: lastSeenText }" /></p>
       </template>
 
       <template v-else>
-        <p class="hint">{{ t('homelab.connecting') }}</p>
+        <p class="hint"><T path="homelab.connecting" /></p>
       </template>
     </div>
   </section>

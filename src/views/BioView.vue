@@ -1,51 +1,53 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { journey, experience, education } from '@/data/bio'
 import { useI18n } from '@/i18n'
+import FuriganaText from '@/components/FuriganaText.vue'
 
 const { t } = useI18n()
 </script>
 
 <template>
   <main class="container page">
-    <h1 class="page-title">{{ t('bio.title') }}</h1>
-    <p class="page-subtitle">{{ t('bio.subtitle') }}</p>
+    <h1 class="page-title"><T path="bio.title" /></h1>
+    <p class="page-subtitle"><T path="bio.subtitle" /></p>
 
     <section class="section">
-      <h2 class="section-title">{{ t('about.journey') }}</h2>
+      <h2 class="section-title"><T path="about.journey" /></h2>
       <ol class="timeline">
         <li v-for="(entry, i) in journey" :key="i" class="timeline-item">
           <span class="timeline-year">{{ entry.year ?? '·' }}</span>
-          <span class="timeline-text">{{ t(entry.text) }}</span>
+          <span class="timeline-text"><T :path="entry.text" /></span>
         </li>
       </ol>
     </section>
 
     <section class="section">
-      <h2 class="section-title">{{ t('about.experience') }}</h2>
+      <h2 class="section-title"><T path="about.experience" /></h2>
       <div v-if="experience.length" class="experience">
         <article v-for="(job, i) in experience" :key="i" class="job">
           <div class="job-head">
-            <h3 class="job-role">{{ t(job.role) }}</h3>
-            <span class="job-period">{{ t(job.period) }}</span>
+            <h3 class="job-role"><T :path="job.role" /></h3>
+            <span class="job-period"><T :path="job.period" /></span>
           </div>
           <p class="job-org">{{ job.org }}</p>
-          <p v-if="job.description" class="job-desc">{{ t(job.description) }}</p>
+          <p v-if="job.description" class="job-desc"><T :path="job.description" /></p>
         </article>
       </div>
       <div v-else class="waiting-card">
-        <p class="empty">{{ t('about.expEmpty') }}</p>
+        <p class="empty"><T path="about.expEmpty" /></p>
       </div>
     </section>
 
     <section class="section">
-      <h2 class="section-title">{{ t('about.education') }}</h2>
+      <h2 class="section-title"><T path="about.education" /></h2>
       <div class="experience">
         <article v-for="(ed, i) in education" :key="i" class="job">
           <div class="job-head">
-            <h3 class="job-role">{{ ed.school }}</h3>
-            <span class="job-period">{{ t(ed.period) }}</span>
+            <h3 class="job-role"><FuriganaText :text="ed.school" /></h3>
+            <span class="job-period"><T :path="ed.period" /></span>
           </div>
-          <p class="job-org">{{ t(ed.degree) }}</p>
+          <p class="job-org"><T :path="ed.degree" /></p>
         </article>
       </div>
     </section>

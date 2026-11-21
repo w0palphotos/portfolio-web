@@ -12,7 +12,8 @@ export default {
   "lang": {
     "switch": "言語を切り替え",
     "target": "日本語",
-    "note": "日本語はAI翻訳です（自筆ではありません）"
+    "note": "日本語はAI翻訳です（自筆ではありません）",
+    "furigana": "ふりがな"
   },
   "home": {
     "greeting": "はじめまして、w0palです。",

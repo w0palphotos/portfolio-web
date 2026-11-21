@@ -12,7 +12,8 @@ export default {
   "lang": {
     "switch": "Ganti bahasa",
     "target": "Bahasa Indonesia",
-    "note": "Bahasa Indonesia adalah bahasa asli."
+    "note": "Bahasa Indonesia adalah bahasa asli.",
+    "furigana": "Furigana"
   },
   "about": {
     "title": "Tentang",

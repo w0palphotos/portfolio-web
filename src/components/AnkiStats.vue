@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
+import FuriganaText from '@/components/FuriganaText.vue'
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useAnkiStats } from '@/composables/useAnkiStats'
 import { useI18n } from '@/i18n'
@@ -157,12 +159,12 @@ onUnmounted(() => {
 <template>
   <section class="section anki">
     <div class="head">
-      <h2 class="section-title">{{ t('now.anki') }}</h2>
+      <h2 class="section-title"><T path="now.anki" /></h2>
     </div>
 
     <!-- Live Stats from Anki -->
     <template v-if="stats && stats.days.length">
-      <p class="summary">{{ summaryText }}</p>
+      <p class="summary"><FuriganaText :text="summaryText" /></p>
 
       <div ref="heatWrap" class="heat-wrap">
         <div class="heat" :style="{ '--cols': weeks.length }">
@@ -192,17 +194,17 @@ onUnmounted(() => {
         </div>
 
         <div class="legend" aria-hidden="true">
-          <span>{{ t('ankiCard.less') }}</span>
+          <span><T path="ankiCard.less" /></span>
           <i class="cell l0" /><i class="cell l1" /><i class="cell l2" /><i class="cell l3" /><i class="cell l4" />
-          <span>{{ t('ankiCard.more') }}</span>
+          <span><T path="ankiCard.more" /></span>
         </div>
       </div>
 
-      <p v-if="updated" class="updated">{{ t('now.synced', { date: updated }) }}</p>
+      <p v-if="updated" class="updated"><T path="now.synced" :vars="{ date: updated }" /></p>
     </template>
 
     <div v-else class="waiting-card">
-      <p class="empty">{{ t('now.ankiWaiting') }}</p>
+      <p class="empty"><T path="now.ankiWaiting" /></p>
     </div>
   </section>
 </template>

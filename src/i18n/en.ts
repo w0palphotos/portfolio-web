@@ -12,7 +12,8 @@ export default {
   "lang": {
     "switch": "Switch language",
     "target": "English",
-    "note": "Japanese is AI-translated, not self-written."
+    "note": "Japanese is AI-translated, not self-written.",
+    "furigana": "Furigana"
   },
   "home": {
     "greeting": "hey, i'm w0pal.",

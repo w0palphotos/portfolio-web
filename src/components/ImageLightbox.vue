@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-vue-next'
 import { useI18n } from '@/i18n'
@@ -205,7 +206,7 @@ onUnmounted(() => {
         />
       </div>
 
-      <div v-if="active.note" class="lightbox-note">{{ t(active.note) }}</div>
+      <div v-if="active.note" class="lightbox-note"><T :path="active.note" /></div>
 
       <div class="lightbox-controls">
         <button
@@ -216,7 +217,7 @@ onUnmounted(() => {
           @click="step(-1)"
         >
           <ChevronLeft :size="14" />
-          <span>{{ t('lightbox.prevShort') }}</span>
+          <span><T path="lightbox.prevShort" /></span>
         </button>
         <span class="lightbox-counter">{{ counter }}</span>
         <button
@@ -226,7 +227,7 @@ onUnmounted(() => {
           :aria-label="t('lightbox.next')"
           @click="step(1)"
         >
-          <span>{{ t('lightbox.nextShort') }}</span>
+          <span><T path="lightbox.nextShort" /></span>
           <ChevronRight :size="14" />
         </button>
       </div>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { ExternalLink } from 'lucide-vue-next'
 import { usePortfolio } from '@/composables/usePortfolio'
 import { useI18n } from '@/i18n'
@@ -9,11 +10,11 @@ const { t } = useI18n()
 
 <template>
   <main class="container page">
-    <h1 class="page-title">{{ t('projects.title') }}</h1>
-    <p class="page-subtitle">{{ t('projects.subtitle') }}</p>
+    <h1 class="page-title"><T path="projects.title" /></h1>
+    <p class="page-subtitle"><T path="projects.subtitle" /></p>
 
     <div v-if="items.length === 0" class="empty-state">
-      {{ t('projects.empty') }}
+      <T path="projects.empty" />
     </div>
 
     <div v-else class="project-list">
@@ -52,7 +53,7 @@ const { t } = useI18n()
               <ExternalLink :size="14" />
             </a>
           </div>
-          <p class="project-desc">{{ t(project.description) }}</p>
+          <p class="project-desc"><T :path="project.description" /></p>
           <div class="project-tags">
             <span v-for="tag in project.tags" :key="tag" class="tag">{{ tag }}</span>
           </div>

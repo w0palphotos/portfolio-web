@@ -3,10 +3,25 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/anki", "destination": "/api/anki" },
-    { "source": "/api/homelab", "destination": "/api/homelab" },
-    { "source": "/api/terminal", "destination": "/api/terminal" },
-    { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/api/anki",
+      "destination": "/api/anki"
+    },
+    {
+      "source": "/api/homelab",
+      "destination": "/api/homelab"
+    },
+    {
+      "source": "/api/terminal",
+      "destination": "/api/terminal"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }

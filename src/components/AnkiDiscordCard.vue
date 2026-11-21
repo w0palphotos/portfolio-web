@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useI18n } from '@/i18n'
 
@@ -76,11 +77,11 @@ const elapsedTime = computed(() => {
           <div class="app-details">{{ presence.details || t('ankiCard.studying') }}</div>
           <div class="app-time">
             <span class="gamepad-icon">🎮</span>
-            <span class="timer-text">{{ t('ankiCard.elapsed', { time: elapsedTime }) }}</span>
+            <span class="timer-text"><T path="ankiCard.elapsed" :vars="{ time: elapsedTime }" /></span>
           </div>
         </template>
         <template v-else>
-          <div class="app-state idle">{{ t('ankiCard.notStudying') }}</div>
+          <div class="app-state idle"><T path="ankiCard.notStudying" /></div>
         </template>
       </div>
     </div>

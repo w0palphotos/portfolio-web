@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { Music } from 'lucide-vue-next'
 import { useI18n } from '@/i18n'
@@ -70,7 +71,7 @@ onUnmounted(() => {
       </div>
       <div class="now-playing-info">
         <template v-if="track">
-          <span class="now-playing-label">{{ t('nowPlaying.playing') }}</span>
+          <span class="now-playing-label"><T path="nowPlaying.playing" /></span>
           <a
             :href="track.url"
             target="_blank"
@@ -80,8 +81,8 @@ onUnmounted(() => {
           <span class="now-playing-artist">{{ track.artist }}</span>
         </template>
         <template v-else>
-          <span class="now-playing-label">{{ t('nowPlaying.nothing') }}</span>
-          <span class="now-playing-idle">{{ t('nowPlaying.checkBack') }}</span>
+          <span class="now-playing-label"><T path="nowPlaying.nothing" /></span>
+          <span class="now-playing-idle"><T path="nowPlaying.checkBack" /></span>
         </template>
       </div>
     </div>

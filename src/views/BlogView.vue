@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { Search } from 'lucide-vue-next'
 import BlogCard from '@/components/BlogCard.vue'
 import { useBlogPosts } from '@/composables/useBlogPosts'
@@ -10,8 +11,8 @@ const { t } = useI18n()
 
 <template>
   <main class="container page">
-    <h1 class="page-title">{{ t('blog.title') }}</h1>
-    <p class="page-subtitle">{{ t('blog.subtitle') }}</p>
+    <h1 class="page-title"><T path="blog.title" /></h1>
+    <p class="page-subtitle"><T path="blog.subtitle" /></p>
 
     <div class="search-wrapper">
       <Search :size="14" class="search-icon" />
@@ -23,7 +24,7 @@ const { t } = useI18n()
       />
     </div>
 
-    <div v-if="loading" class="empty-state">{{ t('blog.loading') }}</div>
+    <div v-if="loading" class="empty-state"><T path="blog.loading" /></div>
 
     <div v-else-if="filteredPosts.length > 0" class="blog-list">
       <BlogCard v-for="post in filteredPosts" :key="post.id" :post="post" />

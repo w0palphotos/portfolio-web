@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { useI18n } from '@/i18n'
 
 const { t } = useI18n()
@@ -13,9 +14,9 @@ const socialLinks = [
 
 <template>
   <main class="container page">
-    <h1 class="greeting">{{ t('home.greeting') }}</h1>
+    <h1 class="greeting"><T path="home.greeting" /></h1>
 
-    <p class="bio">{{ t('home.bio1') }}</p>
+    <p class="bio"><T path="home.bio1" /></p>
 
     <div class="links">
       <a

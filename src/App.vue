@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
@@ -35,7 +36,7 @@ const lastfmApiKey = import.meta.env.VITE_LASTFM_API_KEY || ''
         </transition>
       </router-view>
       <footer v-if="locale === 'ja' && !isAdminRoute" class="translation-note">
-        {{ t('lang.note') }}
+        <T path="lang.note" />
       </footer>
     </div>
     <ImageLightbox />

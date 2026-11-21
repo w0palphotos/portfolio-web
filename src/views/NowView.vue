@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { useStatusPage } from '@/composables/useStatusPage'
 import { useAnkiStats } from '@/composables/useAnkiStats'
 import AnkiStats from '@/components/AnkiStats.vue'
@@ -13,16 +14,16 @@ const { t } = useI18n()
 
 <template>
   <main class="container page">
-    <h1 class="page-title">{{ t('now.title') }}</h1>
-    <p class="page-subtitle">{{ t('now.subtitle') }}</p>
+    <h1 class="page-title"><T path="now.title" /></h1>
+    <p class="page-subtitle"><T path="now.subtitle" /></p>
 
     <section class="section">
-      <h2 class="section-title">{{ t('now.status') }}</h2>
+      <h2 class="section-title"><T path="now.status" /></h2>
       <!-- Persistent rich presence: stays visible when Anki is closed,
            just without any activity -->
       <AnkiDiscordCard v-if="stats?.presence" :presence="stats.presence" />
       <div v-else class="waiting-card">
-        <p class="empty">{{ t('now.statusWaiting') }}</p>
+        <p class="empty"><T path="now.statusWaiting" /></p>
       </div>
     </section>
 
@@ -31,16 +32,16 @@ const { t } = useI18n()
     <HomelabTerminal />
 
     <section class="section">
-      <h2 class="section-title">{{ t('now.goals') }}</h2>
+      <h2 class="section-title"><T path="now.goals" /></h2>
       <ul class="item-list">
-        <li v-for="(goal, i) in statusData.goals" :key="i" class="item">{{ t(goal) }}</li>
+        <li v-for="(goal, i) in statusData.goals" :key="i" class="item"><T :path="goal" /></li>
       </ul>
     </section>
 
     <section class="section">
-      <h2 class="section-title">{{ t('now.interests') }}</h2>
+      <h2 class="section-title"><T path="now.interests" /></h2>
       <ul class="item-list">
-        <li v-for="(interest, i) in statusData.interests" :key="i" class="item">{{ t(interest) }}</li>
+        <li v-for="(interest, i) in statusData.interests" :key="i" class="item"><T :path="interest" /></li>
       </ul>
     </section>
   </main>

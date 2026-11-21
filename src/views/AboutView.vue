@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useAboutPage } from '@/composables/useAboutPage'
 import { machines } from '@/data/about'
 import { useI18n } from '@/i18n'
+import { linkParts } from '@/utils/links'
 import { useLightbox, type LightboxItem } from '@/composables/useLightbox'
+import FuriganaText from '@/components/FuriganaText.vue'
 
 const { aboutData } = useAboutPage()
 const { t } = useI18n()
@@ -107,44 +110,32 @@ const homelabLastSeen = computed(() => {
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString()
 })
 
-function linkParts(text: string): { text: string; to: string | null }[] {
-  const parts: { text: string; to: string | null }[] = []
-  const re = /\[\[([^\]|]+)\|([^\]]+)\]\]/g
-  let last = 0
-  for (let m = re.exec(text); m; m = re.exec(text)) {
-    if (m.index > last) parts.push({ text: text.slice(last, m.index), to: null })
-    parts.push({ text: m[1], to: m[2] })
-    last = m.index + m[0].length
-  }
-  if (last < text.length) parts.push({ text: text.slice(last), to: null })
-  return parts
-}
 </script>
 
 <template>
   <main class="container page">
-    <h1 class="page-title">{{ t('about.title') }}</h1>
-    <p class="page-subtitle">{{ t('about.subtitle') }}</p>
+    <h1 class="page-title"><T path="about.title" /></h1>
+    <p class="page-subtitle"><T path="about.subtitle" /></p>
 
     <section class="section">
       <template v-for="(para, i) in aboutData.aboutParagraphs" :key="i">
         <p v-if="para !== 'about.cameraPhoto' && t(para)" class="bio">
           <template v-for="(part, j) in linkParts(t(para))" :key="j">
             <router-link v-if="part.to" :to="part.to">{{ part.text }}</router-link>
-            <template v-else>{{ part.text }}</template>
+            <FuriganaText v-else :text="part.text" />
           </template>
         </p>
         <figure v-else-if="para === 'about.cameraPhoto'" class="camera-photo">
           <button type="button" class="picture-trigger" :aria-label="t('lightbox.open')" @click="openImage(0)">
             <img src="/images/fujifilm-x-t10.webp" :alt="t('about.photoAlt')" loading="lazy" width="1067" height="1600" />
           </button>
-          <figcaption v-if="t('about.photoCaption')">{{ t('about.photoCaption') }}</figcaption>
+          <figcaption v-if="t('about.photoCaption')"><T path="about.photoCaption" /></figcaption>
         </figure>
       </template>
     </section>
 
     <section class="section">
-      <h2 class="section-title">{{ t('about.machines') }}</h2>
+      <h2 class="section-title"><T path="about.machines" /></h2>
       <div class="machines">
         <article class="machine">
           <div class="machine-head">
@@ -157,13 +148,13 @@ function linkParts(text: string): { text: string; to: string | null }[] {
                 <dd>{{ row.value }}</dd>
               </template>
             </dl>
-            <p class="machine-note">{{ t('about.note.homelabLive') }}</p>
+            <p class="machine-note"><T path="about.note.homelabLive" /></p>
           </template>
           <p v-else-if="homelabState === 'offline'" class="machine-note">
-            {{ t('homelab.offline') }}
-            <template v-if="homelabLastSeen">{{ t('homelab.lastSeen', { time: homelabLastSeen }) }}</template>
+            <T path="homelab.offline" />
+            <template v-if="homelabLastSeen"><T path="homelab.lastSeen" :vars="{ time: homelabLastSeen }" /></template>
           </p>
-          <p v-else class="machine-note">{{ t('homelab.connecting') }}</p>
+          <p v-else class="machine-note"><T path="homelab.connecting" /></p>
         </article>
         <article v-for="m in machines" :key="m.name" class="machine" :class="{ retired: m.retired }">
           <div class="machine-head">
@@ -175,13 +166,13 @@ function linkParts(text: string): { text: string; to: string | null }[] {
               <dd>{{ s.value }}</dd>
             </template>
           </dl>
-          <p v-if="m.note" class="machine-note">{{ t(m.note) }}</p>
+          <p v-if="m.note" class="machine-note"><T :path="m.note" /></p>
         </article>
       </div>
     </section>
 
     <section class="section">
-      <h2 class="section-title">{{ t('about.desk') }}</h2>
+      <h2 class="section-title"><T path="about.desk" /></h2>
       <div class="desk-photos">
         <figure class="wide">
           <button type="button" class="picture-trigger" :aria-label="t('lightbox.open')" @click="openImage(1)">

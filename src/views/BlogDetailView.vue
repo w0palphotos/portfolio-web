@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
+import FuriganaText from '@/components/FuriganaText.vue'
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ArrowLeft, Calendar, Tag, User, ExternalLink } from 'lucide-vue-next'
@@ -117,9 +119,9 @@ watch(
 <template>
   <div>
     <div v-if="notFound" class="container" style="padding: 3rem 1.5rem; text-align: center">
-      <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem">{{ t('blogDetail.notFound') }}</h1>
+      <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem"><T path="blogDetail.notFound" /></h1>
       <router-link to="/blog" style="color: var(--accent); text-decoration: underline; font-size: 0.9375rem">
-        {{ t('blogDetail.back') }}
+        <T path="blogDetail.back" />
       </router-link>
     </div>
 
@@ -130,7 +132,7 @@ watch(
           class="back-link"
         >
           <ArrowLeft :size="16" />
-          <span>{{ t('blogDetail.back') }}</span>
+          <span><T path="blogDetail.back" /></span>
         </router-link>
 
         <article>
@@ -149,7 +151,7 @@ watch(
             </div>
             <div class="meta-item">
               <Calendar :size="14" />
-              <span>{{ date }}</span>
+              <span><FuriganaText :text="date" /></span>
             </div>
             <div v-if="post.categories && post.categories.length > 0" class="meta-item">
               <Tag :size="14" />
@@ -167,14 +169,14 @@ watch(
               <div class="prose-content" v-html="formattedContent" />
               <div class="fade-overlay" />
               <div class="read-more-card">
-                <p>{{ t('blogDetail.mediumNotice') }}</p>
+                <p><T path="blogDetail.mediumNotice" /></p>
                 <a
                   :href="post.originalLink || '#'"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="read-more-btn"
                 >
-                  <span>{{ t('blogDetail.readOnMedium') }}</span>
+                  <span><T path="blogDetail.readOnMedium" /></span>
                   <ExternalLink :size="16" />
                 </a>
               </div>

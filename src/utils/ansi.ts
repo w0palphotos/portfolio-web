@@ -2,6 +2,7 @@
 // (38;5;N / 48;5;N) and truecolor (38;2;R;G;B), bold/dim/underline.
 // Output is always rendered on the dark terminal surface, so colors are
 // fixed (Catppuccin Mocha flavored) rather than theme variables.
+import { escapeHtml } from '@/utils/escapeHtml'
 
 const BASIC_FG: Record<number, string> = {
   30: '#45475a', 31: '#f38ba8', 32: '#a6e3a1', 33: '#f9e2af',
@@ -52,8 +53,8 @@ function styleAttr(s: Style): string {
   return parts.join(';')
 }
 
-export function ansiToHtml(text: string): string {
-  const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+export function ansiToHtml(text: string, options: { preEscaped?: boolean } = {}): string {
+  const escaped = options.preEscaped ? text : escapeHtml(text)
   const segments = escaped.split(/(\x1b\[[0-9;]*m)/)
   const style: Style = { color: null, background: null, bold: false, dim: false, underline: false }
   const out: string[] = []

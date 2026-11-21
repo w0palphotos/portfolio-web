@@ -1,10 +1,20 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useHomelabShell } from '@/composables/useHomelabShell'
 import { useI18n } from '@/i18n'
+import { useFurigana } from '@/composables/useFurigana'
+import { furiganaHtml } from '@/utils/furigana'
 
 const { lines, currentInput, busy, outputRef, handleKeydown, focus, prompt, ansiToHtml } = useHomelabShell()
 const { t } = useI18n()
+const { enabled } = useFurigana()
+
+const renderedLines = computed(() =>
+  lines.value.map((line) => ({
+    ...line,
+    html: ansiToHtml(furiganaHtml(line.text, enabled.value), { preEscaped: true }),
+  })),
+)
 
 onMounted(() => {
   focus()
@@ -15,11 +25,11 @@ onMounted(() => {
   <div class="terminal-page" @click="focus">
     <div ref="outputRef" class="terminal-output">
       <p
-        v-for="(line, i) in lines"
+        v-for="(line, i) in renderedLines"
         :key="i"
         class="line"
         :class="line.type"
-      ><span v-html="ansiToHtml(line.text)"></span></p>
+      ><span v-html="line.html"></span></p>
     </div>
 
     <div class="terminal-input-row">

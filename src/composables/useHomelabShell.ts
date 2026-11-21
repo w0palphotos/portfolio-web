@@ -1,4 +1,4 @@
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { ansiToHtml } from '@/utils/ansi'
 import { useI18n } from '@/i18n'
 
@@ -10,6 +10,7 @@ export interface Line {
 const API = '/api/terminal'
 const POLL_MS = 1000
 const TIMEOUT_MS = 25_000
+const MAX_LINES = 500
 
 // `desc` holds an i18n key; command names stay literal. Flags are validated
 // per-command by the API, so the list here is just bare command names.
@@ -62,6 +63,10 @@ export function useHomelabShell() {
   }
 
   const lines = ref<Line[]>([{ text: banner, type: 'system' }])
+
+  watch(lines, (list) => {
+    if (list.length > MAX_LINES) list.splice(0, list.length - MAX_LINES)
+  })
   const currentInput = ref('')
   const busy = ref(false)
   const commandHistory = ref<string[]>([])

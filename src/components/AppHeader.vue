@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import T from '@/components/T.vue'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { navLinks, type NavLink } from '@/config/navigation'
 import { Menu, X, Disc3, Languages } from 'lucide-vue-next'
 import NowPlaying from '@/components/NowPlaying.vue'
 import { useI18n } from '@/i18n'
+import { useFurigana } from '@/composables/useFurigana'
 
 defineProps<{
   nowPlayingVisible: boolean
@@ -17,7 +19,8 @@ const emit = defineEmits<{
 }>()
 
 const route = useRoute()
-const { t, toggle } = useI18n()
+const { t, toggle, locale } = useI18n()
+const furigana = useFurigana()
 const mobileOpen = ref(false)
 
 function closeMobile() {
@@ -67,7 +70,7 @@ function isActive(link: NavLink) {
           :aria-current="isActive(link) ? 'page' : undefined"
           @click="closeMobile"
         >
-          {{ t(link.label) }}
+          <T :path="link.label" />
         </router-link>
       </nav>
     </div>
@@ -78,7 +81,17 @@ function isActive(link: NavLink) {
         :aria-label="t('lang.switch')"
       >
         <Languages :size="14" />
-        <span>{{ t('lang.target') }}</span>
+        <span><T path="lang.target" /></span>
+      </button>
+      <button
+        v-if="locale === 'ja'"
+        class="lang-toggle furigana-toggle"
+        :class="{ active: furigana.enabled.value }"
+        :aria-pressed="furigana.enabled.value"
+        :aria-label="t('lang.furigana')"
+        @click="furigana.toggle()"
+      >
+        <span><T path="lang.furigana" /></span>
       </button>
       <button
         class="now-playing-toggle"
@@ -87,7 +100,7 @@ function isActive(link: NavLink) {
         :aria-label="t('aria.toggleNowPlaying')"
       >
         <Disc3 :size="14" />
-        <span>{{ t('nowPlaying.toggle') }}</span>
+        <span><T path="nowPlaying.toggle" /></span>
       </button>
       <NowPlaying
         v-if="nowPlayingVisible"
@@ -274,6 +287,10 @@ function isActive(link: NavLink) {
 
 .lang-toggle:hover {
   color: var(--text-primary);
+}
+
+.furigana-toggle.active {
+  color: var(--accent);
 }
 
 .now-playing-toggle:hover {

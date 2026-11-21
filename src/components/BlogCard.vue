@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FuriganaText from '@/components/FuriganaText.vue'
 import { computed } from 'vue'
 import { useI18n } from '@/i18n'
 
@@ -35,7 +36,7 @@ const date = computed(() =>
     class="blog-row"
   >
     <div class="row-meta">
-      <span>{{ date }}</span>
+      <span><FuriganaText :text="date" /></span>
       <span v-if="isMedium" class="source-badge">Medium</span>
     </div>
     <h3 class="row-title">{{ post.title }}</h3>
