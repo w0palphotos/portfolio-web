@@ -11,7 +11,6 @@ import { useFurigana } from '@/composables/useFurigana'
 defineProps<{
   nowPlayingVisible: boolean
   lastfmUsername: string
-  lastfmApiKey: string
 }>()
 
 const emit = defineEmits<{
@@ -105,7 +104,6 @@ function isActive(link: NavLink) {
       <NowPlaying
         v-if="nowPlayingVisible"
         :username="lastfmUsername"
-        :api-key="lastfmApiKey"
       />
     </div>
   </aside>

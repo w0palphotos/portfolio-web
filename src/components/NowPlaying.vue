@@ -6,7 +6,6 @@ import { useI18n } from '@/i18n'
 
 const props = defineProps<{
   username: string
-  apiKey: string
 }>()
 
 const { t } = useI18n()
@@ -24,24 +23,14 @@ const track = ref<Track | null>(null)
 let interval: ReturnType<typeof setInterval> | null = null
 
 async function fetchNowPlaying() {
-  if (!props.username || !props.apiKey) return
+  if (!props.username) return
   try {
-    const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${props.username}&api_key=${props.apiKey}&format=json&limit=1`
+    // The key lives on the server; this request never contains it.
+    const url = `/api/lastfm?user=${encodeURIComponent(props.username)}`
     const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = await res.json()
-    const recent = data.recenttracks?.track?.[0]
-    if (recent && recent['@attr']?.nowplaying) {
-      track.value = {
-        name: recent.name,
-        artist: recent.artist['#text'],
-        album: recent.album['#text'],
-        image: recent.image?.[2]?.['#text'] || '',
-        url: recent.url,
-        nowplaying: true,
-      }
-    } else {
-      track.value = null
-    }
+    track.value = data.track || null
   } catch {
     track.value = null
   }

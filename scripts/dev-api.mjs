@@ -8,11 +8,13 @@ import { createServer } from 'node:http'
 import anki from '../api/anki.js'
 import homelab from '../api/homelab.js'
 import terminal from '../api/terminal.js'
+import lastfm from '../api/lastfm.js'
 
 const routes = new Map([
   ['/api/anki', anki],
   ['/api/homelab', homelab],
   ['/api/terminal', terminal],
+  ['/api/lastfm', lastfm],
 ])
 
 function parseBody(raw, contentType) {

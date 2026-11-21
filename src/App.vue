@@ -17,7 +17,6 @@ function toggleNowPlaying() {
 }
 
 const lastfmUsername = import.meta.env.VITE_LASTFM_USERNAME || ''
-const lastfmApiKey = import.meta.env.VITE_LASTFM_API_KEY || ''
 </script>
 
 <template>
@@ -26,7 +25,6 @@ const lastfmApiKey = import.meta.env.VITE_LASTFM_API_KEY || ''
       v-if="!isAdminRoute"
       :now-playing-visible="nowPlayingVisible"
       :lastfm-username="lastfmUsername"
-      :lastfm-api-key="lastfmApiKey"
       @toggle-now-playing="toggleNowPlaying"
     />
     <div class="content-area">
