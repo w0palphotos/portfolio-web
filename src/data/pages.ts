@@ -9,7 +9,7 @@ export interface StatusData {
 }
 
 export const aboutData: AboutData = {
-  aboutParagraphs: ['about.intro1', 'about.introLinux', 'about.introPhoto', 'about.cameraPhoto', 'about.cameraAfter', 'about.introServer', 'about.introJapanese'],
+  aboutParagraphs: ['about.intro1', 'about.introLinux', 'about.introPhoto', 'about.cameraPhoto', 'about.cameraAfter', 'about.introServer', 'about.introJapanese', 'about.translationNote'],
   interests: [
     { icon: 'Monitor', title: 'PC Enthusiast', description: 'Building and optimizing PCs since 2020' },
     { icon: 'Code', title: 'Linux User', description: 'Linux Desktop user since 2023' },

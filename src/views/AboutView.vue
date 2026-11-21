@@ -12,6 +12,8 @@ interface HomelabStats {
   online: boolean
   lastSeen?: string
   host?: string | null
+  hostname?: string | null
+  user?: string | null
   cpu?: { model: string | null; cores: number | null; maxFreqGHz: number | null } | null
   memory?: Usage | null
   disk?: (Usage & { fs?: string | null }) | null
@@ -73,6 +75,7 @@ const homelabRows = computed<SpecRow[]>(() => {
   if (!s) return []
   const rows: SpecRow[] = []
   if (s.host) rows.push({ label: 'Host', value: s.host })
+  if (s.user && s.hostname) rows.push({ label: 'Hostname', value: `${s.user}@${s.hostname}` })
   if (s.cpu?.model) {
     const cores = s.cpu.cores ? `, ${s.cpu.cores} cores` : ''
     const freq = s.cpu.maxFreqGHz ? ` @ ${s.cpu.maxFreqGHz} GHz` : ''
@@ -114,15 +117,15 @@ function linkParts(text: string): { text: string; to: string | null }[] {
 
     <section class="section">
       <template v-for="(para, i) in aboutData.aboutParagraphs" :key="i">
-        <p v-if="para !== 'about.cameraPhoto'" class="bio">
+        <p v-if="para !== 'about.cameraPhoto' && t(para)" class="bio">
           <template v-for="(part, j) in linkParts(t(para))" :key="j">
             <router-link v-if="part.to" :to="part.to">{{ part.text }}</router-link>
             <template v-else>{{ part.text }}</template>
           </template>
         </p>
-        <figure v-else class="camera-photo">
+        <figure v-else-if="para === 'about.cameraPhoto'" class="camera-photo">
           <img src="/images/fujifilm-x-t10.webp" :alt="t('about.photoAlt')" loading="lazy" width="1067" height="1600" />
-          <figcaption>{{ t('about.photoCaption') }}</figcaption>
+          <figcaption v-if="t('about.photoCaption')">{{ t('about.photoCaption') }}</figcaption>
         </figure>
       </template>
     </section>
@@ -243,6 +246,7 @@ function linkParts(text: string): { text: string; to: string | null }[] {
   max-width: min(100%, 22rem);
   max-height: 34rem;
   height: auto;
+  margin-inline: 0;
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
 }
@@ -321,7 +325,7 @@ function linkParts(text: string): { text: string; to: string | null }[] {
 
 .specs {
   display: grid;
-  grid-template-columns: 5.5ch 1fr;
+  grid-template-columns: 9ch minmax(0, 1fr);
   gap: 0.125rem 0.75rem;
   font-size: 0.75rem;
   margin: 0;
@@ -334,6 +338,8 @@ function linkParts(text: string): { text: string; to: string | null }[] {
 .specs dd {
   color: var(--text-secondary);
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .machine-note {
