@@ -20,6 +20,7 @@ const { t } = useI18n()
       <article
         v-for="project in items"
         :key="project.id"
+        :id="project.id"
         class="project-item"
       >
         <a

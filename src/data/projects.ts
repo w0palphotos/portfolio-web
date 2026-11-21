@@ -13,6 +13,14 @@ export interface Project {
 // `description` holds an i18n key (see src/i18n); titles are repo names.
 export const projects: Project[] = [
   {
+    id: 'reverse-vending-machine',
+    title: 'Reverse Vending Machine',
+    description: 'projects.desc.rvm',
+    link: 'https://www.linkedin.com/in/w0pal/',
+    imageUrl: null,
+    tags: ['PC building', 'IoT'],
+  },
+  {
     id: 'x17blake-linux',
     title: 'x17blake-linux',
     description: 'projects.desc.x17blake',
