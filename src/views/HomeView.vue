@@ -14,11 +14,8 @@ const socialLinks = [
 <template>
   <main class="container page">
     <h1 class="greeting">{{ t('home.greeting') }}</h1>
-    <p class="tagline">{{ t('home.tagline') }}</p>
 
     <p class="bio">{{ t('home.bio1') }}</p>
-
-    <p class="bio">{{ t('home.bio2') }}</p>
 
     <div class="links">
       <a
@@ -44,12 +41,6 @@ const socialLinks = [
   line-height: 1.15;
   margin-bottom: 0.5rem;
   text-wrap: balance;
-}
-
-.tagline {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin-bottom: 1.5rem;
 }
 
 .bio {
