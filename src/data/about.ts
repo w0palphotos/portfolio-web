@@ -3,8 +3,8 @@
 //
 // NOTE: machines were seeded from existing documented sources (homelab
 // README, the RAM-overclocking Medium post, live fastfetch). Confirm them
-// and fill in the EliteBook specs. Experience/education come from the public
-// LinkedIn profile (linkedin.com/in/w0pal).
+// and fill in the EliteBook specs. Journey, experience, and education live in
+// src/data/bio.ts.
 
 export interface MachineSpec {
   label: string
@@ -19,108 +19,28 @@ export interface Machine {
   note?: string
 }
 
-export interface JourneyEntry {
-  year: string | null
-  text: string
-}
-
-export interface ExperienceEntry {
-  role: string
-  org: string
-  period: string
-  description?: string
-}
-
-export interface EducationEntry {
-  school: string
-  degree: string
-  period: string
-}
-
 export const machines: Machine[] = [
   {
-    name: 'HP EliteDesk 800 G3 DM 35W',
-    role: 'about.role.homelab',
-    specs: [
-      { label: 'CPU', value: 'Intel Core i5-7500T (4 cores) @ 3.30 GHz' },
-      { label: 'RAM', value: '8 GiB DDR4' },
-      { label: 'Storage', value: '240 GB NVMe SSD' },
-      { label: 'OS', value: 'Alpine Linux' },
-    ],
-    note: 'about.note.eliteDesk',
-  },
-  {
-    name: 'HP EliteBook',
+    name: 'HP EliteBook 845 G8',
     role: 'about.role.daily',
     specs: [
-      { label: 'OS', value: 'Fedora Silverblue' },
+      { label: 'CPU', value: 'AMD Ryzen 5 PRO 5650U' },
+      { label: 'RAM', value: '16 GB DDR4-3200 (1×16 GB)' },
+      { label: 'Storage', value: '256 GB NVMe SSD' },
+      { label: 'OS', value: 'Fedora 44 with niri + dankmaterialshell' },
     ],
-    note: 'about.specsPending',
   },
   {
-    name: 'Ryzen desktop (first build)',
+    name: 'PC (first build)',
     role: 'about.role.firstBuild',
     specs: [
-      { label: 'CPU', value: 'AMD Ryzen 5' },
+      { label: 'CPU', value: 'AMD Ryzen 5 3500X' },
+      { label: 'RAM', value: '2×8 GB DDR4-2400, overclocked to 3200 MT/s CL16' },
+      { label: 'Storage', value: '512 GB M.2 SATA SSD + 512 GB SATA SSD' },
+      { label: 'GPU', value: 'AMD Radeon RX 570 8 GB (MSI GAMING X)' },
       { label: 'Board', value: 'ASRock A320M-HDV R4.0' },
-      { label: 'RAM', value: 'V-Gen DDR4 2400 MT/s, overclocked to 3600 MT/s CL18' },
     ],
     note: 'about.note.firstBuild',
   },
-  {
-    name: 'ZTE B860H',
-    role: 'about.role.formerServer',
-    retired: true,
-    specs: [
-      { label: 'SoC', value: 'Amlogic p212 (4 cores @ 1.51 GHz)' },
-      { label: 'RAM', value: '1.75 GiB' },
-      { label: 'Storage', value: '58 GB SD + 6.5 GB eMMC' },
-      { label: 'OS', value: 'Armbian' },
-    ],
-    note: 'about.note.zte',
-  },
 ]
 
-export const journey: JourneyEntry[] = [
-  { year: '2020', text: 'about.journeyText.y2020' },
-  { year: '2023', text: 'about.journeyText.y2023linux' },
-  { year: '2023', text: 'about.journeyText.y2023uni' },
-  { year: null, text: 'about.journeyText.photo' },
-  { year: '2026', text: 'about.journeyText.y2026' },
-  { year: 'now', text: 'about.journeyText.now' },
-]
-
-// Source: linkedin.com/in/w0pal (public profile)
-export const experience: ExperienceEntry[] = [
-  {
-    role: 'about.expRole.gd',
-    org: 'PT. Kaldyta Mega Tech',
-    period: 'about.period.gd',
-    description: 'about.expDesc.gd',
-  },
-  {
-    role: 'about.expRole.repair',
-    org: 'PT. Kaldyta Mega Tech',
-    period: 'about.period.gd',
-    description: 'about.expDesc.repair',
-  },
-  {
-    role: 'about.expRole.ds',
-    org: 'Coding Camp powered by DBS Foundation',
-    period: 'about.period.ds',
-    description: 'about.expDesc.ds',
-  },
-]
-
-export const education: EducationEntry[] = [
-  {
-    school: 'Nusa Putra University',
-    degree: 'about.eduDegree.uni',
-    period: 'about.period.uni',
-  },
-  {
-    school: 'SMAIT Insani',
-    degree: 'about.eduDegree.hs',
-    period: 'about.period.hs',
-  },
-]
