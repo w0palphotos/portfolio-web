@@ -5,6 +5,7 @@ import BlogView from '@/views/BlogView.vue'
 import BlogDetailView from '@/views/BlogDetailView.vue'
 import AboutView from '@/views/AboutView.vue'
 import BioView from '@/views/BioView.vue'
+import PicturesView from '@/views/PicturesView.vue'
 import NowView from '@/views/NowView.vue'
 import TerminalView from '@/views/TerminalView.vue'
 
@@ -40,6 +41,11 @@ const router = createRouter({
       path: '/bio',
       name: 'bio',
       component: BioView,
+    },
+    {
+      path: '/pictures',
+      name: 'pictures',
+      component: PicturesView,
     },
     {
       path: '/now',
