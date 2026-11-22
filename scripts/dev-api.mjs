@@ -6,7 +6,7 @@
 
 import { createServer } from 'node:http'
 import anki from '../api/anki.js'
-import homelab from '../api/homelab.js'
+import homelab from '../api/homelab-local.js'
 import terminal from '../api/terminal.js'
 import lastfm from '../api/lastfm.js'
 
