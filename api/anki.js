@@ -1,5 +1,7 @@
 // Anki tracker API: supports both Database Mode (Upstash Redis) and In-Memory Direct Mode (Database-Optional).
 
+import { buildAnkiCardSvg } from './_anki-card.js'
+
 const KEY = 'anki:stats'
 
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL
@@ -102,16 +104,32 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     const data = await kvGet()
-    if (!data) return res.status(404).json({ error: 'no stats yet, waiting for anki to push' })
+    const params = new URL(req.url || '/', 'http://localhost').searchParams
 
     // Check presence freshness (TTL expiry check if offline or older than 45s)
-    if (data.presence) {
+    if (data?.presence) {
       const lastSeen = data.presence.updatedAt ? new Date(data.presence.updatedAt).getTime() : 0
       const now = Date.now()
       if (data.presence.status === 'offline' || (now - lastSeen > 45_000)) {
         data.presence.status = 'offline'
       }
     }
+
+    // Embeddable SVG card: same data as the JSON endpoint, but hotlinkable in
+    // a README. Render an empty card before the first push so it never 404s.
+    if (params.get('format') === 'svg') {
+      const weeks = Number.parseInt(params.get('weeks') || '', 10)
+      const svg = buildAnkiCardSvg(data, {
+        theme: params.get('theme') || 'tokyonight',
+        weeks: Number.isNaN(weeks) ? 53 : weeks,
+        title: params.get('title') || 'Anki reviews',
+      })
+      res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8')
+      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=300')
+      return res.status(200).end(svg)
+    }
+
+    if (!data) return res.status(404).json({ error: 'no stats yet, waiting for anki to push' })
 
     // Global (non-personalized) response: edge-cacheable so viral traffic
     // spikes don't multiply Redis/function load per viewer.
